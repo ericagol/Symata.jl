@@ -82,7 +82,7 @@ const pymx_special_symbol_dict = Dict()
 # sometimes.
 
 # NOTE: The test suite passes with this dict empty
-# So, we leave it empty until we see something we don't like
+# So, we leave it empty until we see something we don't like.
 const py_to_mx_symbol_dict = Dict()
 
 # const py_to_mx_symbol_dict = Dict(
@@ -99,12 +99,13 @@ const py_to_mx_symbol_dict = Dict()
 # This does not refer the sympy 'rewrite' capability.
 # This refers to some kind of rewriting of functions or arguments
 # during sympy to sjulia translation.
+# This dict is populated below.
 const py_to_mx_rewrite_function_dict = Dict(
                                             )
 # End translation Dicts
 ######################################################
 
-
+# Digits of precision for Sympy
 const MPMATH_DPS = Int[0]
 
 get_mpmath_dps() = mpmath.mp[:dps]
@@ -115,8 +116,8 @@ end
 
 restore_mpmath_dps() = (mpmath.mp[:dps] = pop!(MPMATH_DPS))
 
-
-
+# This translates key value pairs that we use to
+# describe the mapping from sj to py.
 function get_sympy_math(x)
     if length(x) == 1
         jf = x[1]
@@ -319,10 +320,10 @@ end
 # py_to_mx_rewrite_function_dict["LessThan"] = pytosj_less_than_equal
 
 
-function pytosj_BooleanTrue(pyexpr)
-    return true
-end
-py_to_mx_rewrite_function_dict["BooleanTrue"] = pytosj_BooleanTrue
+pytosj_BooleanTrue(pyexpr) = true
+
+# Disable this and see what happens
+# py_to_mx_rewrite_function_dict["BooleanTrue"] = pytosj_BooleanTrue
 
 ####
 ####   Main _pytosj method
@@ -576,19 +577,12 @@ function _sjtopy(mx::Mxpr)
     end
 end
 
+# mx is a julia Symbol
 function _sjtopy(mx::Symbol)
     if haskey(mx_to_py_dict,mx)
         return mx_to_py_dict[mx]
     end
     return sympy.Symbol(mx)
-end
-
-function _sjtopy(mx::SSJSym)
-    name = symname(mx)
-    if haskey(mx_to_py_dict,name)
-        return conv_rev[name]
-    end
-    return sympy.Symbol(name)
 end
 
 _sjtopy{T<:Integer}(mx::Rational{T}) = sympy.Rational(num(mx),den(mx))
@@ -601,9 +595,7 @@ _sjtopy{T}(a::Array{T,1}) =  map(_sjtopy, a)
 _sjtopy{T <: PyCall.PyObject}(expr::T) = expr
 
 
-function _sjtopy(x::AbstractString)
-    x
-end
+_sjtopy(x::AbstractString) =  x
 
 # Don't error, but only warn. Then return x so that we
 # can capture and inspect it.
