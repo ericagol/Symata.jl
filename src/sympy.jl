@@ -23,6 +23,9 @@ function import_sympy()
     eval(parse("@pyimport mpmath"))
 end
 
+######################################################
+#   Translation Dicts
+
 # SYMPY_TO_SJULIA_FUNCTIONS
 # 1) keys are sympy function names. values are the SJulia Head
 # The sympy functions are found via sympy.key and are stored
@@ -41,10 +44,40 @@ end
 # mx_to_py_dict "by hand" in populate_mx_to_py_dict().(does it need to be done this way ?)
 
 const SYMPY_TO_SJULIA_FUNCTIONS = Dict{Symbol,Symbol}()
-
 const SJULIA_TO_SYMPY_FUNCTIONS = Dict{Symbol,Symbol}()
+
+# described above
 const mx_to_py_dict =  Dict()   # Can we specify types for these Dicts ?
+
+# If sympy returns and instance of Pi, Ep1, ImaginaryUnit, etc. it
+# is found in this table. This dict, or something like it may
+# be neccesary because sympy sometimes returns the class and sometimes
+# an instance. (even though there is only one instance)
 const pymx_special_symbol_dict = Dict()
+
+# py_to_mx_symbol_dict
+# These are perhaps sympy 'symbols' rather than functions or instance.
+# Use this Dict to rely more on these lines:
+# head = sympy_to_mxpr_symbol(expr[:func][:__name__])
+#    return SJulia.mxpr(head, map(pytosj, expr[:args])...)
+const py_to_mx_symbol_dict = Dict(
+                                  :StrictLessThan => :<,
+                                  :StrictGreaterThan => :>,
+                                  :LessThan => :<=,
+                                  :GreaterThan => :>=,
+                                  :uppergamma => :Gamma,
+                                  :Equality => :(==),
+                                  :Unequality => :(!=)
+                                  )
+
+# This does not refer the sympy 'rewrite' capability.
+# This refers to some kind of rewriting of functions or arguments
+# during sympy to sjulia translation.
+const py_to_mx_rewrite_function_dict = Dict(
+                                            )
+# End translation Dicts
+######################################################
+
 
 const MPMATH_DPS = Int[0]
 
@@ -57,25 +90,7 @@ end
 restore_mpmath_dps() = (mpmath.mp[:dps] = pop!(MPMATH_DPS))
 
 
-# TODO: populate this Dict. Collect the translation into fewer Dicts.
-# Use this Dict to rely more on these lines:
-#    head = sympy_to_mxpr_symbol(expr[:func][:__name__])  # Maybe we can move this further up ?
-#    return SJulia.mxpr(head, map(pytosj, expr[:args])...)
 
-const py_to_mx_symbol_dict = Dict(
-                                  :StrictLessThan => :<,
-                                  :StrictGreaterThan => :>,
-                                  :LessThan => :<=,
-                                  :GreaterThan => :>=,
-                                  :uppergamma => :Gamma,
-                                  :Equality => :(==),
-                                  :Unequality => :(!=)
-                                  )
-
-
-# populated below
-const py_to_mx_rewrite_function_dict = Dict(
-                                            )
 function get_sympy_math(x)
     if length(x) == 1
         jf = x[1]
