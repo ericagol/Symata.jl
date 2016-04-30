@@ -463,17 +463,21 @@ sjgamma(a,z) = sympy_gamma(sjtopy(a),sjtopy(z)) |> pytosj
 do_Gamma(mx::Mxpr{:Gamma},a) = sjgamma(a)
 do_Gamma(mx::Mxpr{:Gamma},a,z) = sjgamma(a,z)
 
-register_sjfunc_pyfunc(:Gamma,:gamma)
-register_only_pyfunc_to_sjfunc(:Gamma,:uppergamma)
+set_pytosj(:gamma, :Gamma)
+set_pytosj(:uppergamma, :Gamma)
+set_sjtopy(:Gamma, :sympy_gamma)
 
 #### Erf
 
 @mkapprule Erf :nargs => 1:2
 
-do_Erf{T<:AbstractFloat}(mx::Mxpr{:Erf},x::T) = erf(x) #julia function
-do_Erf{T<:AbstractFloat}(mx::Mxpr{:Erf},x::Complex{T}) = erf(x) #julia function 
-do_Erf(mx::Mxpr{:Erf},x) = pytosj(sympy.erf(sjtopy(x)))
-do_Erf(mx::Mxpr{:Erf},x,y) = pytosj(sympy.erf2(sjtopy(x),sjtopy(y)))
+sjerf{T<:AbstractFloat}(x::T) = erf(x)
+sjerf{T<:AbstractFloat}(x::Complex{T}) = erf(x)
+sjerf(a) = a |> sjtopy |> sympy_erf |> pytosj
+sjerf(a,z) = sympy_erf(sjtopy(a),sjtopy(z)) |> pytosj
+
+do_Erf(mx::Mxpr{:Erf},x) = sjerf(x)
+do_Erf(mx::Mxpr{:Erf},x,y) = sjerf(x,y)
 
 register_sjfunc_pyfunc(:Erf,:erf)
 register_only_pyfunc_to_sjfunc(:Erf,:erf2)

@@ -67,6 +67,28 @@ end
 const SYMPY_TO_SJULIA_FUNCTIONS = Dict{Symbol,Symbol}()
 const SJULIA_TO_SYMPY_FUNCTIONS = Dict{Symbol,Symbol}()
 
+function set_pytosj(py,sj)
+    if haskey(SYMPY_TO_SJULIA_FUNCTIONS,py)
+        warn("*** set_pytosj ", py, " already has value ", SYMPY_TO_SJULIA_FUNCTIONS[py], " can't set it to ", sj)
+        return
+    end
+    SYMPY_TO_SJULIA_FUNCTIONS[py] = sj
+end
+
+get_pytosj(py) = SYMPY_TO_SJULIA_FUNCTIONS[py]
+
+function set_sjtopy(sj,py)
+    if haskey(SJULIA_TO_SYMPY_FUNCTIONS,sj)
+        warn("*** set_sjtopy ", sj, " already has value ", SJULIA_TO_SYMPY_FUNCTIONS[sj], " can't set it to ", py)
+        return
+    end
+    SJULIA_TO_SYMPY_FUNCTIONS[sj] = py
+end
+
+get_sjtopy(sj) = SJULIA_TO_SYMPY_FUNCTIONS[sj]
+
+#################################################################
+
 # described above
 const mx_to_py_dict =  Dict()   # Can we specify types for these Dicts ?
 
@@ -149,11 +171,12 @@ function make_sympy_to_sjulia()
                       ( :InverseLaplaceTransform, :inverse_laplace_transform ),
                       (:InverseFourierTransform, :inverse_fourier_transform ),
                       (:FourierTransform, :fourier_transform),
-                      (:Cos, :cos), (:Log, :log), ( :Sqrt, :sqrt), (:ProductLog, :LambertW),
+                      (:Log, :log), ( :Sqrt, :sqrt), (:ProductLog, :LambertW),
                       (:Exp, :exp), (:Abs, :Abs), (:MeijerG, :meijerg), (:PolarLift, :polar_lift),
                       (:ExpPolar, :exp_polar), (:LowerGamma, :lowergamma),
-                      (:PeriodicArgument, :periodic_argument),(:Gamma, :sympy_gamma)
-                      ]   # Fucking broken 
+                      (:PeriodicArgument, :periodic_argument),(:Erf, :sympy_erf)
+#                      (:Gamma, :sympy_gamma),(:Erf, :sympy_erf)
+                      ]
 
     for funclist in (single_arg_float_complex, single_arg_float_int_complex, single_arg_float,
                      single_arg_float_int, single_arg_int, two_arg_int,
@@ -163,7 +186,7 @@ function make_sympy_to_sjulia()
         for x in funclist
             if length(x) != 3 continue end
             (julia_func, sjulia_func, sympy_func) = x
-            SYMPY_TO_SJULIA_FUNCTIONS[sympy_func] = sjulia_func
+            set_pytosj(sympy_func, sjulia_func) 
         end
     end
 
@@ -173,24 +196,27 @@ function make_sympy_to_sjulia()
                      no_julia_function_three_args, no_julia_function_four_args)
         for x in funclist
             sjulia_func, sympy_func = get_sympy_math(x)
-            SYMPY_TO_SJULIA_FUNCTIONS[sympy_func] = sjulia_func
+            set_pytosj(sympy_func, sjulia_func)
         end
     end
 
-    for (k,v) in SYMPY_TO_SJULIA_FUNCTIONS
-        SJULIA_TO_SYMPY_FUNCTIONS[v] = k
+    for (py,sj) in SYMPY_TO_SJULIA_FUNCTIONS
+        set_sjtopy(sj,py)
     end
-    SYMPY_TO_SJULIA_FUNCTIONS[:InverseLaplaceTransform] = :InverseLaplaceTransform
+    set_pytosj(:InverseLaplaceTransform,:InverseLaplaceTransform)
+
 #    SYMPY_TO_SJULIA_FUNCTIONS[:TupleArg] = :List does not work
 end
 
 function register_sjfunc_pyfunc{T<:Union{AbstractString,Symbol}, V<:Union{AbstractString,Symbol}}(sj::T, py::V)
-    SYMPY_TO_SJULIA_FUNCTIONS[symbol(py)] = symbol(sj)
-    SJULIA_TO_SYMPY_FUNCTIONS[symbol(sj)] = symbol(py)
+    set_pytosj(symbol(py), symbol(sj))
+    set_sjtopy(symbol(sj), symbol(py))
 end
 
+# Watch the order
 function register_only_pyfunc_to_sjfunc{T<:Union{AbstractString,Symbol}, V<:Union{AbstractString,Symbol}}(sj::T, py::V)
-    SYMPY_TO_SJULIA_FUNCTIONS[symbol(py)] = symbol(sj)
+    set_pytosj(py,sj)
+#    SYMPY_TO_SJULIA_FUNCTIONS[symbol(py)] = symbol(sj)
 end
 
 ## These two functions are only used in doc.jl to look up the
@@ -199,7 +225,8 @@ function have_pyfunc_symbol(sjsym)
     haskey(SJULIA_TO_SYMPY_FUNCTIONS, sjsym)
 end
 function lookup_pyfunc_symbol(sjsym)
-    SJULIA_TO_SYMPY_FUNCTIONS[sjsym]
+    get_sjtopy(sjsym)
+#    SJULIA_TO_SYMPY_FUNCTIONS[sjsym]
 end
 
 ####################
@@ -489,20 +516,22 @@ end
 #     end
 # end
 
+# Good disabling causes Integrate( Exp(-x^2)*Erf(x), x) to fail
+# Disable and hope we find a bug
 # This information is in several places. I am not sure why it is here.
-function _sjtopy(mx::Mxpr{:Erf})
-    @sjdebug(1,"Erf ", mx)
-    ma = margs(mx)
-    if length(ma) == 1
-        sympy.erf(_sjtopy(ma[1]))
-    elseif length(ma) == 2
-        pyargs = map(_sjtopy,ma)
-        result = erf2(pyargs...)
-        result
-    else
-        sympy.erf(map(_sjtopy,ma)...)  # This will fail for sure
-    end
-end
+# function _sjtopy(mx::Mxpr{:Erf})
+#     @sjdebug(1,"Erf ", mx)
+#     ma = margs(mx)
+#     if length(ma) == 1
+#         sympy.erf(_sjtopy(ma[1]))
+#     elseif length(ma) == 2
+#         pyargs = map(_sjtopy,ma)
+#         result = erf2(pyargs...)
+#         result
+#     else
+#         sympy.erf(map(_sjtopy,ma)...)  # This will fail for sure
+#     end
+# end
 
 # For now all infinities are mapped to one of two infinities
 function _sjtopy(mx::Mxpr{:DirectedInfinity})
@@ -591,7 +620,7 @@ end
 ## Sympy functions are called here.
 function _sjtopy(mx::Mxpr)
     if mhead(mx) in keys(mx_to_py_dict)
-        @sjdebug(1,"In mx_to_py_dict ", mx)
+        @sjdebug(1,"In mx_to_py_dict ", mx, " pyhead ", mx_to_py_dict[mhead(mx)] )
         return mx_to_py_dict[mhead(mx)](map(_sjtopy, mx.args)...) # calling a function in our dictionary
     end
     @sjdebug(1,"Make function ", mx)

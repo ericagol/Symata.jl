@@ -5,10 +5,10 @@ import Base.Test: @test
 
 @ex TimeOff()   # don't print hundreds of diagnostic lines
 
+include("sympy_test.jl")
 include("up_downvalues_test.jl")
 include("math_functions_test.jl")
 include("lists_test.jl")
-include("sympy_test.jl")
 include("trig_test.jl")
 include("comparison_test.jl")
 include("attributes_test.jl")
