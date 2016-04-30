@@ -15,7 +15,7 @@
 @testex Chop(Gamma(1,.5) - 0.6065306597126334) == 0
 #@testex isapprox(Gamma(.5), 1.772453850905516)  don't know if this is worth the trouble
 @testex Gamma(1,2) == E^(-2)
-# @testex
+@testex Gamma(a,0) == Gamma(a)
 # @testex
 # @testex
 # @testex
@@ -24,8 +24,6 @@
 # @testex
 # @testex 
 
-
-
-
+@ex ClearAll(a)
 @ex If( Length(UserSyms()) > 0 ,  Println("\n**********", UserSyms(), "\n"))
 @testex Length(UserSyms()) == 0

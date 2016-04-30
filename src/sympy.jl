@@ -33,6 +33,17 @@ macro pydebug(level, a...)
     end
 end
 
+const SJDEBUGLEVEL = -1
+
+macro sjdebug(level, a...)
+    if level <= SJDEBUGLEVEL
+        :((println("sjdeb: ", $(a...));println()))
+    else
+        nothing
+    end
+end
+
+
 ######################################################
 #   Translation Dicts
 
@@ -141,8 +152,8 @@ function make_sympy_to_sjulia()
                       (:Cos, :cos), (:Log, :log), ( :Sqrt, :sqrt), (:ProductLog, :LambertW),
                       (:Exp, :exp), (:Abs, :Abs), (:MeijerG, :meijerg), (:PolarLift, :polar_lift),
                       (:ExpPolar, :exp_polar), (:LowerGamma, :lowergamma),
-                      (:PeriodicArgument, :periodic_argument)
-                      ]
+                      (:PeriodicArgument, :periodic_argument),(:Gamma, :sympy_gamma)
+                      ]   # Fucking broken 
 
     for funclist in (single_arg_float_complex, single_arg_float_int_complex, single_arg_float,
                      single_arg_float_int, single_arg_int, two_arg_int,
@@ -376,7 +387,7 @@ function _pytosj{T <: PyCall.PyObject}(expr::T)
 # should we check for floats earlier ?
         return convert(AbstractFloat, expr) # Need to check for big floats
     end
-    @pydebug(3, "default trans. ", expr)    
+    @pydebug(3, "default trans. ", expr)
     head = sympy_to_mxpr_symbol(expr[:func][:__name__])  # default
     return mxpr(head, map(pytosj, expr[:args])...)
 end
@@ -424,7 +435,7 @@ function mk_mx_to_py_funcs()
         sjstr = string(sjsym)
         local obj
         if length(pystr) > 6 && pystr[1:6] == "sympy_"  # These are wrapper function around sympy functions
-            obj = pysym   
+            obj = eval(pysym)
         else
             obj = eval(parse("sympy." * pystr))   # These call the sympy functions directly
         end
@@ -436,6 +447,7 @@ end
 ##     sjtopy
 #######################################################
 
+# NB wrapper to call _sjtopy
 function sjtopy(args...)
     if length(args) == 1
         res = _sjtopy(args[1])
@@ -446,6 +458,7 @@ function sjtopy(args...)
 end
 
 function _sjtopy(z::Complex)
+    @sjdebug(3,"complex ", z)
     if real(z) == 0
         res = mxpr(:Times, :I, imag(z))
     else
@@ -455,25 +468,30 @@ function _sjtopy(z::Complex)
 end
 
 function _sjtopy(mx::Mxpr{:List})
+    @sjdebug(3,"List ", mx)
     return [map(_sjtopy, mx.args)...]
 end
 
+# This also breaks something. But, there is not test for it, apparently.
+# So, again, we wait.
+# Disable this in favor of wrapper sympy_gamma. I hope
 # This is never used. (Yes it is!)
-function _sjtopy(mx::Mxpr{:Gamma})
-    ma = margs(mx)
-    if length(ma) == 1
-        sympy.gamma(_sjtopy(ma[1]))
-    elseif length(ma) == 2
-        pyargs = map(_sjtopy,ma)
-        result = sympy.uppergamma(pyargs...)
-        result
-    else
-        sympy.gamma(map(_sjtopy,ma)...)
-    end
-end
+# function _sjtopy(mx::Mxpr{:Gamma})
+#     ma = margs(mx)
+#     if length(ma) == 1
+#         sympy.gamma(_sjtopy(ma[1]))
+#     elseif length(ma) == 2
+#         pyargs = map(_sjtopy,ma)
+#         result = sympy.uppergamma(pyargs...)
+#         result
+#     else
+#         sympy.gamma(map(_sjtopy,ma)...)
+#     end
+# end
 
 # This information is in several places. I am not sure why it is here.
 function _sjtopy(mx::Mxpr{:Erf})
+    @sjdebug(1,"Erf ", mx)
     ma = margs(mx)
     if length(ma) == 1
         sympy.erf(_sjtopy(ma[1]))
@@ -573,8 +591,10 @@ end
 ## Sympy functions are called here.
 function _sjtopy(mx::Mxpr)
     if mhead(mx) in keys(mx_to_py_dict)
+        @sjdebug(1,"In mx_to_py_dict ", mx)
         return mx_to_py_dict[mhead(mx)](map(_sjtopy, mx.args)...) # calling a function in our dictionary
     end
+    @sjdebug(1,"Make function ", mx)
     pyfunc = sympy.Function(string(mhead(mx)))  # Don't recognize the head, so make it a user function
     mxargs = margs(mx)
     if length(mxargs) == 0
@@ -587,6 +607,7 @@ end
 # mx is a julia Symbol
 function _sjtopy(mx::Symbol)
     if haskey(mx_to_py_dict,mx)
+        @sjdebug(1,"In mx_to_py_dixt ", mx)
         return mx_to_py_dict[mx]
     end
     return sympy.Symbol(mx)
@@ -625,7 +646,7 @@ function init_sympy()
     # jslexless{T<:PyCall.PyObject}(x::T,y::T) = true  # this is not catching what it should catch!!
     # _jslexless{T<:PyCall.PyObject}(x::T,y::T) = true # this is not catching what it should catch!!
     # Base.isless{T<:PyCall.PyObject}(x::T,y::T) = true     # works if I enter it by hand after the init. No idea why
-    # isless{T<:PyCall.PyObject}(x::T,y::T) = true     # works if I enter it by hand after the init. No idea why    
+    # isless{T<:PyCall.PyObject}(x::T,y::T) = true     # works if I enter it by hand after the init. No idea why
 end
 
 #####

@@ -114,7 +114,6 @@ end
 # (:log,),   removed from list above, because it must be treated specially (and others probably too!)
 
 
-
 const single_arg_float_int_complex =
         [
          (:conj,:Conjugate)
@@ -458,16 +457,11 @@ make_math()
 
 sjgamma{T<:AbstractFloat}(x::T) = gamma(x)
 sjgamma{T<:AbstractFloat}(x::Complex{T}) = gamma(x)
-sjgamma(a) = a |> sjtopy |> sympy.gamma |> pytosj
-sjgamma(a,z) = sympy.uppergamma(sjtopy(a),sjtopy(z)) |> pytosj
+sjgamma(a) = a |> sjtopy |> sympy_gamma |> pytosj
+sjgamma(a,z) = sympy_gamma(sjtopy(a),sjtopy(z)) |> pytosj
 
 do_Gamma(mx::Mxpr{:Gamma},a) = sjgamma(a)
 do_Gamma(mx::Mxpr{:Gamma},a,z) = sjgamma(a,z)
-
-# do_Gamma{T<:AbstractFloat}(mx::Mxpr{:Gamma},x::T) = gamma(x)         
-# do_Gamma{T<:AbstractFloat}(mx::Mxpr{:Gamma},x::Complex{T}) = gamma(x)
-# do_Gamma(mx::Mxpr{:Gamma},x) = pytosj(sympy.gamma(sjtopy(x)))         
-# do_Gamma(mx::Mxpr{:Gamma},x,y) = pytosj(sympy.uppergamma(sjtopy(x),sjtopy(y)))
 
 register_sjfunc_pyfunc(:Gamma,:gamma)
 register_only_pyfunc_to_sjfunc(:Gamma,:uppergamma)
