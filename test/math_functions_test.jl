@@ -14,7 +14,7 @@
 @testex Gamma(0) == ComplexInfinity
 @testex Chop(Gamma(1,.5) - 0.6065306597126334) == 0
 #@testex isapprox(Gamma(.5), 1.772453850905516)  don't know if this is worth the trouble
-# @testex 
+@testex Gamma(1,2) == E^(-2)
 # @testex
 # @testex
 # @testex

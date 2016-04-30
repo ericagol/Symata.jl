@@ -131,7 +131,8 @@ function get_sympy_math(x)
     return jf,sjf
 end
 
-# This only maps names. It does not write translation or calling code.
+# These are used for rewriting in both directions and function calling
+# via sympy.symbol
 function make_sympy_to_sjulia()
     symbolic_misc = [ (:Order, :Order), (:LaplaceTransform, :laplace_transform),
                       ( :InverseLaplaceTransform, :inverse_laplace_transform ),
@@ -421,7 +422,12 @@ function mk_mx_to_py_funcs()
     for (sjsym,pysym) in SJULIA_TO_SYMPY_FUNCTIONS
         pystr = string(pysym)
         sjstr = string(sjsym)
-        obj = eval(parse("sympy." * pystr))
+        local obj
+        if length(pystr) > 6 && pystr[1:6] == "sympy_"  # These are wrapper function around sympy functions
+            obj = pysym   
+        else
+            obj = eval(parse("sympy." * pystr))   # These call the sympy functions directly
+        end
         mx_to_py_dict[symbol(sjstr)] = obj
     end
 end
@@ -564,14 +570,15 @@ end
 
 ######
 
+## Sympy functions are called here.
 function _sjtopy(mx::Mxpr)
     if mhead(mx) in keys(mx_to_py_dict)
-        return mx_to_py_dict[mhead(mx)](map(_sjtopy, mx.args)...)
+        return mx_to_py_dict[mhead(mx)](map(_sjtopy, mx.args)...) # calling a function in our dictionary
     end
     pyfunc = sympy.Function(string(mhead(mx)))  # Don't recognize the head, so make it a user function
     mxargs = margs(mx)
     if length(mxargs) == 0
-        return pyfunc(dummy_arg)
+        return pyfunc(dummy_arg)  # sympy functions must have at least one argument
     else
         return pyfunc(map(_sjtopy, mxargs)...)
     end
@@ -668,11 +675,10 @@ function separate_rules{T<:Mxpr}(mx::T)
     return (nargs, kws)
 end
 
-
-# Mma uses the expression Rule(a,b) to represent a keyword argument. It also
-# uses Rule for many other things. This is awkward.
-# Here, we separate keyword Rules from all other args including Rules that
-# are not meant to be keywords.
+# Mma uses the expression Rule(a,b) to represent a keyword
+# argument. It also uses Rule for many other things. This is awkward.
+# Here, we separate keyword Rules from all other args including Rules
+# that are not meant to be keywords.
 # kws -- Dict of legal keywords wit their default values.
 # Only Rules with keywords in kws will be extracted
 function separate_known_rules{T<:Mxpr}(mx::T, kws)
