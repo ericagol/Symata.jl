@@ -23,6 +23,16 @@ function import_sympy()
     eval(parse("@pyimport mpmath"))
 end
 
+const PYDEBUGLEVEL = -1
+
+macro pydebug(level, a...)
+    if level <= PYDEBUGLEVEL
+        :((println("pydeb: ", $(a...));println()))
+    else
+        nothing
+    end
+end
+
 ######################################################
 #   Translation Dicts
 
@@ -49,10 +59,15 @@ const SJULIA_TO_SYMPY_FUNCTIONS = Dict{Symbol,Symbol}()
 # described above
 const mx_to_py_dict =  Dict()   # Can we specify types for these Dicts ?
 
-# If sympy returns and instance of Pi, Ep1, ImaginaryUnit, etc. it
-# is found in this table. This dict, or something like it may
-# be neccesary because sympy sometimes returns the class and sometimes
-# an instance. (even though there is only one instance)
+# pymx_special_symbol_dict
+# If sympy returns an instance of Pi, Ep1, ImaginaryUnit, etc. it
+# is found in this table. This is currently neccesary. Without it:
+# * Pi causes an error exception because the default translation tries to call it.
+#    i.e. it is not a symbol, function, number ...
+# * E is returned as the function Exp1() it is caught by the
+#   is_Function check, and returns Exp1()
+# * I is caught by the default at the end, is callable and returns
+#   ImaginaryUnit(). It is not a symbol nor is_Function.
 const pymx_special_symbol_dict = Dict()
 
 # py_to_mx_symbol_dict
@@ -60,15 +75,26 @@ const pymx_special_symbol_dict = Dict()
 # Use this Dict to rely more on these lines:
 # head = sympy_to_mxpr_symbol(expr[:func][:__name__])
 #    return SJulia.mxpr(head, map(pytosj, expr[:args])...)
-const py_to_mx_symbol_dict = Dict(
-                                  :StrictLessThan => :<,
-                                  :StrictGreaterThan => :>,
-                                  :LessThan => :<=,
-                                  :GreaterThan => :>=,
-                                  :uppergamma => :Gamma,
-                                  :Equality => :(==),
-                                  :Unequality => :(!=)
-                                  )
+# Gamma( a < b) returns the function gamma,
+# with one argument Comparison(a, > , b), which is caught
+# by the is_Function check. a, <, and b are caught by the
+# Symbol check. However, the symbols in this table do occur
+# sometimes.
+
+# NOTE: The test suite passes with this dict empty
+# So, we leave it empty until we see something we don't like
+const py_to_mx_symbol_dict = Dict()
+
+# const py_to_mx_symbol_dict = Dict(
+#                                   :StrictLessThan => :<,
+#                                   :StrictGreaterThan => :>,
+#                                   :LessThan => :<=,
+#                                   :GreaterThan => :>=,
+#                                   :uppergamma => :Gamma,
+#                                   :Equality => :(==),
+#                                   :Unequality => :(!=)
+#                                   )
+
 
 # This does not refer the sympy 'rewrite' capability.
 # This refers to some kind of rewriting of functions or arguments
@@ -208,8 +234,6 @@ have_function_sympy_to_sjulia_translation{T <: PyCall.PyObject}(expr::T) = haske
 get_function_sympy_to_sjulia_translation{T <: PyCall.PyObject}(expr::T) = py_to_mx_dict[pytypeof(expr)]
 have_rewrite_function_sympy_to_julia{T <: PyCall.PyObject}(expr::T) = haskey(py_to_mx_rewrite_function_dict, name(expr))
 
-
-
 function populate_special_symbol_dict()
     for onepair in (
                     (sympy_core.numbers["Pi"], :Pi),
@@ -239,6 +263,7 @@ increment_pytosj_count() = SYMPYTRACENUM[1] += 1
 decrement_pytosj_count() = SYMPYTRACENUM[1] -= 1
 is_pytosj_trace() = SYMPYTRACE.trace
 
+## Note there are two underscores __pytosj
 function __pytosj(expr)
     increment_pytosj_count()
     if is_pytosj_trace()
@@ -304,21 +329,29 @@ py_to_mx_rewrite_function_dict["BooleanTrue"] = pytosj_BooleanTrue
 ####
 function _pytosj{T <: PyCall.PyObject}(expr::T)
     if have_function_sympy_to_sjulia_translation(expr)
+        @pydebug(3, "function lookup trans. ", expr)
         return mxpr(get_function_sympy_to_sjulia_translation(expr), map(pytosj, expr[:args])...)
     end
     if have_rewrite_function_sympy_to_julia(expr)
+        @pydebug(3, "rewrite trans. ", expr)
         return rewrite_function_sympy_to_julia(expr)
     end
-    if expr[:is_Function] return pytosj_Function(expr) end   # perhaps a user defined function
+    if expr[:is_Function]
+        @pydebug(3, "is_Function trans. ", expr)
+        return pytosj_Function(expr)
+    end   # perhaps a user defined function
     for k in keys(pymx_special_symbol_dict)
         if pyisinstance(expr,k)
+            @pydebug(3, "special_symbol trans. ", expr)
             return pymx_special_symbol_dict[k]
         end
     end
     if pytypeof(expr) == sympy.Symbol
+        @pydebug(3, "pytype Symbol trans. ", expr)
         return sympy_to_mxpr_symbol(expr[:name])
     end
     if pyisinstance(expr, sympy.Number)
+        @pydebug(3, "number trans. ", expr)
         # Big ints are wrapped up in a bunch of stuff
         # There is a function n._to_mpmath(m) (dont know what m means) that returns GMP number useable by Julia
         # We need to check what kind of integer. searching methods. no luck
@@ -341,6 +374,7 @@ function _pytosj{T <: PyCall.PyObject}(expr::T)
 # should we check for floats earlier ?
         return convert(AbstractFloat, expr) # Need to check for big floats
     end
+    @pydebug(3, "default trans. ", expr)    
     head = sympy_to_mxpr_symbol(expr[:func][:__name__])  # default
     return mxpr(head, map(pytosj, expr[:args])...)
 end
