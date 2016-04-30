@@ -23,11 +23,24 @@ function import_sympy()
     eval(parse("@pyimport mpmath"))
 end
 
+# SYMPY_TO_SJULIA_FUNCTIONS
+# 1) keys are sympy function names. values are the SJulia Head
+# The sympy functions are found via sympy.key and are stored
+# in the dict py_to_mx_dict, with values being the SJulia heads.
+# Some other special cases,
+# eg Add Mul are also stored in py_to_mx_dict.
+# The SJulia heads are looked up only at the beginning
+# of the main _pytosj routine.
+# An Mxpr is created by looking up the head and mapping
+# _pytosj over the args.
+#
+# 2) A reversed dict SJULIA_TO_SYMPY_FUNCTIONS is created from SYMPY_TO_SJULIA_FUNCTIONS.
+# This dict is used for two things a) to automatically lookup sympy docstrings associated
+# with SJulia heads in doc.jl. b) to populated mx_to_py_dict. This dict stores callable references
+# to sympy functions with keys being the SJulia heads. A few other sympy functions are put into
+# mx_to_py_dict "by hand" in populate_mx_to_py_dict().(does it need to be done this way ?)
 
-
-# Some SymPy functions are encoded this way. Others, not. Eg, Add, Mul are different
 const SYMPY_TO_SJULIA_FUNCTIONS = Dict{Symbol,Symbol}()
-
 
 const SJULIA_TO_SYMPY_FUNCTIONS = Dict{Symbol,Symbol}()
 const mx_to_py_dict =  Dict()   # Can we specify types for these Dicts ?
@@ -126,11 +139,11 @@ function register_only_pyfunc_to_sjfunc{T<:Union{AbstractString,Symbol}, V<:Unio
     SYMPY_TO_SJULIA_FUNCTIONS[symbol(py)] = symbol(sj)
 end
 
-
+## These two functions are only used in doc.jl to look up the
+# docstring corresponding to the symp function called by an SJulia head.
 function have_pyfunc_symbol(sjsym)
     haskey(SJULIA_TO_SYMPY_FUNCTIONS, sjsym)
 end
-
 function lookup_pyfunc_symbol(sjsym)
     SJULIA_TO_SYMPY_FUNCTIONS[sjsym]
 end
@@ -271,7 +284,9 @@ function pytosj_BooleanTrue(pyexpr)
 end
 py_to_mx_rewrite_function_dict["BooleanTrue"] = pytosj_BooleanTrue
 
-
+####
+####   Main _pytosj method
+####
 function _pytosj{T <: PyCall.PyObject}(expr::T)
     if have_function_sympy_to_sjulia_translation(expr)
         return mxpr(get_function_sympy_to_sjulia_translation(expr), map(pytosj, expr[:args])...)

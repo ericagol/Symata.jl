@@ -11,10 +11,11 @@ Head( :( :( a = 1) )) returns Expr. Note we have to quote twice, because one lev
 a quoted Julia expression is evaluated so that we can embed Julia code.
 "
 
-apprules(mx::Mxpr{:Head}) = gethead(mx[1])
-gethead(mx::Mxpr) = mhead(mx)
-gethead(s::SJSym) = getsym(:Symbol)
-gethead(ex) = typeof(ex)
+@mkapprule Head  :nargs =>  1
+
+@doap Head(mx1::Mxpr) = mhead(mx1)
+@doap Head(s::SJSym) = getsym(:Symbol)  # or just :Symbol ? This is the ancient inteface
+@doap Head(ex) = typeof(ex)
 
 #### ExpandA
 
