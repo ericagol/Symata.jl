@@ -755,7 +755,7 @@ end
 
 @mkapprule PyDoc :nargs => 1
 
-do_PyDoc(mx::Mxpr{:PyDoc},sym) = pydoc(sym)
+do_PyDoc(mx::Mxpr{:PyDoc},sym) = pydoc(string(sym))
 
 # Need a function that searchs or returns a list,...
 @sjdoc PyDoc "
@@ -766,11 +766,21 @@ for development.
 # Look up the sympy symbol in the "registry" and get the doc string
 function pydoc(sym)
     pyC = sympy.C
-    ! haskey(pyC,sym) && error("No symbol $sym")
-    str = try
-        pyC[sym][:__doc__]
-    catch
-        "no docmentation"
+    local str
+    if haskey(pyC,sym)
+        str = try
+            pyC[sym][:__doc__]
+        catch
+            "Symbol in registry, but no doc found."
+        end
+    else
+        warn("Symbol ", sym, " not in registry. Looking elsewhere...")
+        str =
+            try
+                eval(parse("sympy.$(string(sym))[:__doc__]"))
+            catch
+                "No documentation found"
+            end
     end
     println(str)
 end

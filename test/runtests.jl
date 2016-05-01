@@ -5,11 +5,12 @@ import Base.Test: @test
 
 @ex TimeOff()   # don't print hundreds of diagnostic lines
 
-# testUserSyms
-# userSymList
-# userSymList = Map(ToString, UserSyms())
-# testUserSyms := (If( userSymList != Map(ToString,UserSyms()), Println("**********", UserSyms())); False)
+testUserSyms
+userSymList
+userSymList = Map(ToString, UserSyms())
+testUserSyms := (If( userSymList != Map(ToString,UserSyms()), Println("**********", UserSyms())); False)
 
+include("algebraic_transformations_test.jl")
 include("sympy_test.jl")
 include("up_downvalues_test.jl")
 include("math_functions_test.jl")

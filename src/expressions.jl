@@ -385,6 +385,11 @@ FactorInteger(n) gives a list of prime factors of n and their multiplicities.
 "
 apprules(mx::Mxpr{:FactorInteger}) = setfixed(mxpr(:List,do_unpack(factor(mx[1]))))
 
+#### Level
+
+
+
+
 #### Map
 
 @sjdoc Map "
@@ -518,8 +523,6 @@ function do_GenHead(mx,head::Mxpr{:Cases})
     mxpr(mhead(head),copy(margs(mx))...,margs(head)...)
 end
 
-
-
 #### Push!
 
 @sjdoc Push! "
@@ -541,6 +544,7 @@ do_Push(mx,x::SJSym,val) = do_Push1(mx,symval(x),val)
 do_Push1(mx,x,val) = mx
 do_Push1(mx,x::Mxpr,val) = (push!(x.args,val); val)
 
+#### Pop!
 
 @sjdoc Pop! "
 Pop!(expr) pops a value from the arguments of expr. This mutates expr.
