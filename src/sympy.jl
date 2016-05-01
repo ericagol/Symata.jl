@@ -280,8 +280,12 @@ have_function_sympy_to_sjulia_translation{T <: PyCall.PyObject}(expr::T) = haske
 get_function_sympy_to_sjulia_translation{T <: PyCall.PyObject}(expr::T) = py_to_mx_dict[pytypeof(expr)]
 have_rewrite_function_sympy_to_julia{T <: PyCall.PyObject}(expr::T) = haskey(py_to_mx_rewrite_function_dict, name(expr))
 
+# May 2016. Added ComplexInfinity here. We added an mxpr method for
+# using Mxpr for head. sympy.zoo had been caught by the default method
+# for converting, and this resulted in an Mxpr for the head.
 function populate_special_symbol_dict()
     for onepair in (
+                    (sympy.numbers["ComplexInfinity"], :ComplexInfinity),
                     (sympy_core.numbers["Pi"], :Pi),
                     (sympy_core.numbers["EulerGamma"], :EulerGamma),
                     (sympy.numbers["Exp1"],  :E),
@@ -421,9 +425,13 @@ function _pytosj{T <: PyCall.PyObject}(expr::T)
 # should we check for floats earlier ?
         return convert(AbstractFloat, expr) # Need to check for big floats
     end
-    @pydebug(3, "default trans. ", expr)
     head = sympy_to_mxpr_symbol(expr[:func][:__name__])  # default
-    return mxpr(head, map(pytosj, expr[:args])...)
+    @pydebug(3, "default trans. ", expr, " new head ", head)
+    @pydebug(3, "typeof head ", typeof(head))
+    @pydebug(3, "args  ", expr[:args])
+    mxout =  mxpr(head, map(pytosj, expr[:args])...)
+    @pydebug(3, "mxout ", mxout)
+    mxout
 end
 
 # By default, Dict goes to Dict

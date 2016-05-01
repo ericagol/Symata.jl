@@ -365,15 +365,31 @@ end
 type GenHead
 end
 
+
+# New method May 2016. We do want to use Mxpr's as heads
+# We disable this for now. A number of expressions are interpreted incorrectly this way.
+# eg  s = [f,g]
+#   s[1](x) , should give f(x). But it is instead caught by this method.
+# I don't know how s[1](x) is handled, then !?
+# function mxpr(mxhead::Mxpr,args...)
+#     println("mxpr is  head method")
+#     nargs = Any[args...]
+#     mx = Mxpr{:Mxpr}(mxhead,nargs,false,false,newsymsdict(),0,0,Any)
+#     setage(mx)
+#     mx
+# end
+
+# # New method May 2016
+# function mxpr(mxhead::Mxpr,args::MxprArgs)
+#     println("mxpr is  head method, with args mxhead is ", mxhead, ", args are ", args)
+#     mx = Mxpr{:Mxpr}(mxhead,args,false,false,newsymsdict(),0,0,Any)
+#     setage(mx)
+#     mx
+# end
+
 # Non-symbolic Heads have type GenHead, for now
 function mxpr(s,args::MxprArgs)
     mx = Mxpr{GenHead}(s,args,false,false,newsymsdict(),0,0,Any)
-    setage(mx)
-    mx
-end
-
-function mxpr(mxhead::Mxpr,args...)
-    mx = Mxpr{mxhead}(mxhead,tomxprargs(args),false,false,newsymsdict(),0,0,Any)
     setage(mx)
     mx
 end
