@@ -460,8 +460,8 @@ sjgamma{T<:AbstractFloat}(x::Complex{T}) = gamma(x)
 sjgamma(a) = a |> sjtopy |> sympy_gamma |> pytosj
 sjgamma(a,z) = sympy_gamma(sjtopy(a),sjtopy(z)) |> pytosj
 
-do_Gamma(mx::Mxpr{:Gamma},a) = sjgamma(a)
-do_Gamma(mx::Mxpr{:Gamma},a,z) = sjgamma(a,z)
+@doap Gamma(a) = sjgamma(a)
+@doap Gamma(a,z) = sjgamma(a,z)
 
 set_pytosj(:gamma, :Gamma)
 set_pytosj(:uppergamma, :Gamma)
@@ -476,8 +476,8 @@ sjerf{T<:AbstractFloat}(x::Complex{T}) = erf(x)
 sjerf(a) = a |> sjtopy |> sympy_erf |> pytosj
 sjerf(a,z) = sympy_erf(sjtopy(a),sjtopy(z)) |> pytosj
 
-do_Erf(mx::Mxpr{:Erf},x) = sjerf(x)
-do_Erf(mx::Mxpr{:Erf},x,y) = sjerf(x,y)
+@doap Erf(x) = sjerf(x)
+@doap Erf(x,y) = sjerf(x,y)
 
 set_pytosj(:erf, :Erf)
 set_pytosj(:erf2, :Erf)
@@ -487,9 +487,9 @@ set_sjtopy(:Erf, :sympy_erf)
 
 @mkapprule InverseErf :nargs => 1:2
 
-do_InverseErf{T<:AbstractFloat}(mx::Mxpr{:InverseErf},x::T) = x < 1 && x > -1 ? erfinv(x) : mx
-do_InverseErf(mx::Mxpr{:InverseErf},x) = pytosj(sympy.erfinv(sjtopy(x)))
-do_InverseErf(mx::Mxpr{:InverseErf},x,y) = pytosj(sympy.erf2inv(sjtopy(x),sjtopy(y)))
+@doap InverseErf{T<:AbstractFloat}(x::T) = x < 1 && x > -1 ? erfinv(x) : mx
+@doap InverseErf(x) = pytosj(sympy.erfinv(sjtopy(x)))
+@doap InverseErf(x,y) = pytosj(sympy.erf2inv(sjtopy(x),sjtopy(y)))
 
 register_sjfunc_pyfunc(:InverseErf,:erfinv)
 register_only_pyfunc_to_sjfunc(:InverseErf,:erf2inv)

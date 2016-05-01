@@ -6,6 +6,11 @@
 @testex Erf(0) == 0
 @testex Head(Erf(0)) == Int
 @testex Erf(DirectedInfinity(I)) == DirectedInfinity(I)
+@testex Erf(I*Infinity) == DirectedInfinity(I)
+@testex Erf(-Infinity) == -1
+@testex Erf(-z) == -Erf(z)
+@testex Conjugate(Erf(-z)) == -Erf(Conjugate(z))
+@testex Args(Conjugate(Erf(-z))) == [-1,Erf(Conjugate(z))]
 
 #### Gamma
 
@@ -21,6 +26,13 @@
 @testex Gamma(a,0) == Gamma(a)
 @testex Gamma(a, Infinity) == 0
 @testex D(Gamma(x),x) == Gamma(x) * (PolyGamma(0,x))
+@testex Gamma(3,x) == 2 * (E ^ (-x)) + 2 * (E ^ (-x)) * x + E ^ (-x) * (x ^ 2)
+@testex Gamma(-1/2,x) == 2 * (E ^ (-x)) * (x ^ (-1/2)) + -2 * (Pi ^ (1/2)) * (1 + -Erf(x ^ (1/2)))
+@testex Gamma(-2,x) == x ^ (-2) * (ExpIntegralE(3,x))
+# @testex
+# @testex
+# @testex
+# @testex 
 
 # FIXME.
 # Cutting and pasting the output of the Series
@@ -31,14 +43,6 @@
 # Its not clear this should be an automatic evaluation
 @testex Conjugate(Gamma(x)) == Gamma(Conjugate(x))
 
-# @testex
-# @testex
-# @testex
-# @testex
-# @testex
-# @testex
-# @testex 
-
-@ex ClearAll(a,x)
+@ex ClearAll(a,x,z)
 @ex If( Length(UserSyms()) > 0 ,  Println("\n**********", UserSyms(), "\n"))
 @testex Length(UserSyms()) == 0
