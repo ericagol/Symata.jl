@@ -15,6 +15,7 @@ import Base.Test: @test
 @testex testUserSyms
 @testex testUserSyms
 
+include("output_test.jl")
 include("algebraic_transformations_test.jl")
 include("sympy_test.jl")
 include("up_downvalues_test.jl")

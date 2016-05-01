@@ -264,13 +264,14 @@ function show_infix(io::IO, mx::Mxpr)
     # so we can copy output to input.
 #    if mhead(mx) == :Times sepsym = " " end # not a sym. Maybe we should make them all strings
     startind = 1
-    if is_Mxpr(mx,:Times) &&
-        length(args) > 0 && args[1] == -1
+    if is_Mxpr(mx,:Times) && length(args) > 0 && args[1] == -1
         print(io, "-")
         startind = 2
     end
+#    println("startind ", startind)
     for i in startind:length(args)-1
-        if needsparen(args[i]) && i>1 # && wantparens
+#        if needsparen(args[i]) && i>1 # && wantparens
+        if needsparen(args[i])  # when did we put this i> 1 in ?? it breaks stuff
             np = true
             print(io,"(")
         else
