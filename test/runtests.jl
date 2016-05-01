@@ -5,6 +5,11 @@ import Base.Test: @test
 
 @ex TimeOff()   # don't print hundreds of diagnostic lines
 
+# testUserSyms
+# userSymList
+# userSymList = UserSyms()
+# testUserSyms := (If( userSymList != UserSyms(), Println("**********", UserSyms())); False)
+
 include("sympy_test.jl")
 include("up_downvalues_test.jl")
 include("math_functions_test.jl")
