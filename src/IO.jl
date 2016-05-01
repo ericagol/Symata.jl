@@ -131,7 +131,7 @@ end
 #### Open
 
 # we should fold this behavior into mkapprule
-@mkapprule1 Open
+@mkapprule Open  :nodefault => true
 
 @sjdoc Open "
 Open(args...) opens a file, runs a command, etc. The arguments are passed to julia `open'.

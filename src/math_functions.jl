@@ -674,9 +674,6 @@ Im(x) returns the imaginary part of z.
 # Mma allows complex numbers of mixed Real type. Julia does not.
 # Implementation not complete. eg  Im(a + I *b) --> Im(a) + Re(b)
 
-# This is already created above
-#@mkapprule1 Re
-
 do_Re{T<:Real}(mx::Mxpr{:Re}, x::Complex{T}) = real(x)
 do_Re(mx::Mxpr{:Re}, x::Real) = x
 
@@ -696,7 +693,6 @@ function do_Re_imag_int(m,f)
     end
 end
 
-#@mkapprule1 Im
 do_Im{T<:Real}(mx::Mxpr{:Im}, x::Complex{T}) = imag(x)
 do_Im(mx::Mxpr{:Im}, x::Real) = zero(x)
 
