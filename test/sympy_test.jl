@@ -36,6 +36,7 @@ using Base.Test
 
 @ex     r = Integrate(1/Cos(x + a), x)
 # @testex r == Log(Sec(a + x) + Tan(a + x))  # if not loading code_in_SJulia.jl
+
 @testex r == -1 * Log(-1 + Tan((1//2) * a + (1//2) * x)) + Log(1 + Tan((1//2) * a + (1//2) * x)) # are loading code_in_SJulia.jl
 
 @testex Integrate(E^(-x^2),x) == (1//2) * (π ^ (1//2)) * Erf(x)

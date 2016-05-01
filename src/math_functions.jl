@@ -479,8 +479,9 @@ sjerf(a,z) = sympy_erf(sjtopy(a),sjtopy(z)) |> pytosj
 do_Erf(mx::Mxpr{:Erf},x) = sjerf(x)
 do_Erf(mx::Mxpr{:Erf},x,y) = sjerf(x,y)
 
-register_sjfunc_pyfunc(:Erf,:erf)
-register_only_pyfunc_to_sjfunc(:Erf,:erf2)
+set_pytosj(:erf, :Erf)
+set_pytosj(:erf2, :Erf)
+set_sjtopy(:Erf, :sympy_erf)
 
 #### InverseErf
 

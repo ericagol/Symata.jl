@@ -25,6 +25,7 @@ macro make_simplify_func(mxprsym, sympyfunc)
         end
         set_pattributes( [$smxprsym], :Protected)
         register_sjfunc_pyfunc($smxprsym,$ssympyfunc)
+#        set_pytosj($ssympyfunc,$smxprsym)
     end)
 end
 
@@ -417,7 +418,7 @@ ToSymPy(expr) converts expr to a (python) PyObject.
 
 function apprules(mx::Mxpr{:ToSymPy})
     res = sjtopy(margs(mx)...)
-end 
+end
 
 #### ToSJulia
 
@@ -450,7 +451,7 @@ end
 
 function do_PossibleClosedForm(mx::Mxpr{:PossibleClosedForm}, args...)
     kws = Dict()
-    nargs = sjtopy_kw(mx,kws)    
+    nargs = sjtopy_kw(mx,kws)
     pyargs = sjtopy(nargs...)
     setdps::Bool = false
     if haskey(kws,"dps")

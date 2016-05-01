@@ -68,21 +68,27 @@ const SYMPY_TO_SJULIA_FUNCTIONS = Dict{Symbol,Symbol}()
 const SJULIA_TO_SYMPY_FUNCTIONS = Dict{Symbol,Symbol}()
 
 function set_pytosj(py,sj)
-    if haskey(SYMPY_TO_SJULIA_FUNCTIONS,py)
-        warn("*** set_pytosj ", py, " already has value ", SYMPY_TO_SJULIA_FUNCTIONS[py], " can't set it to ", sj)
+    spy = symbol(py)
+    ssj = symbol(sj)
+    if haskey(SYMPY_TO_SJULIA_FUNCTIONS,spy)
+        warn("*** set_pytosj ", spy, " already has value ", SYMPY_TO_SJULIA_FUNCTIONS[spy], " can't set it to ", ssj)
         return
     end
-    SYMPY_TO_SJULIA_FUNCTIONS[py] = sj
+#    warn("### set_pytosj setting ", spy, " to ", ssj)
+    SYMPY_TO_SJULIA_FUNCTIONS[spy] = ssj
 end
 
 get_pytosj(py) = SYMPY_TO_SJULIA_FUNCTIONS[py]
 
 function set_sjtopy(sj,py)
-    if haskey(SJULIA_TO_SYMPY_FUNCTIONS,sj)
-        warn("*** set_sjtopy ", sj, " already has value ", SJULIA_TO_SYMPY_FUNCTIONS[sj], " can't set it to ", py)
+    spy = symbol(py)
+    ssj = symbol(sj)
+    if haskey(SJULIA_TO_SYMPY_FUNCTIONS,ssj)
+        warn("!!! set_sjtopy ", sj, " already has value ", SJULIA_TO_SYMPY_FUNCTIONS[ssj], " can't set it to ", py)
         return
     end
-    SJULIA_TO_SYMPY_FUNCTIONS[sj] = py
+#    warn("XXX set_sjtopy setting ", sj, " to ", py)
+    SJULIA_TO_SYMPY_FUNCTIONS[ssj] = spy
 end
 
 get_sjtopy(sj) = SJULIA_TO_SYMPY_FUNCTIONS[sj]
@@ -174,8 +180,7 @@ function make_sympy_to_sjulia()
                       (:Log, :log), ( :Sqrt, :sqrt), (:ProductLog, :LambertW),
                       (:Exp, :exp), (:Abs, :Abs), (:MeijerG, :meijerg), (:PolarLift, :polar_lift),
                       (:ExpPolar, :exp_polar), (:LowerGamma, :lowergamma),
-                      (:PeriodicArgument, :periodic_argument),(:Erf, :sympy_erf)
-#                      (:Gamma, :sympy_gamma),(:Erf, :sympy_erf)
+                      (:PeriodicArgument, :periodic_argument)
                       ]
 
     for funclist in (single_arg_float_complex, single_arg_float_int_complex, single_arg_float,
@@ -186,7 +191,8 @@ function make_sympy_to_sjulia()
         for x in funclist
             if length(x) != 3 continue end
             (julia_func, sjulia_func, sympy_func) = x
-            set_pytosj(sympy_func, sjulia_func) 
+            set_pytosj(sympy_func, sjulia_func)
+            set_sjtopy(sjulia_func, sympy_func)            
         end
     end
 
@@ -197,12 +203,13 @@ function make_sympy_to_sjulia()
         for x in funclist
             sjulia_func, sympy_func = get_sympy_math(x)
             set_pytosj(sympy_func, sjulia_func)
+            set_sjtopy(sjulia_func, sympy_func)
         end
     end
 
-    for (py,sj) in SYMPY_TO_SJULIA_FUNCTIONS
-        set_sjtopy(sj,py)
-    end
+    # for (py,sj) in SYMPY_TO_SJULIA_FUNCTIONS
+    #     set_sjtopy(sj,py)
+    # end
     set_pytosj(:InverseLaplaceTransform,:InverseLaplaceTransform)
 
 #    SYMPY_TO_SJULIA_FUNCTIONS[:TupleArg] = :List does not work
@@ -216,7 +223,6 @@ end
 # Watch the order
 function register_only_pyfunc_to_sjfunc{T<:Union{AbstractString,Symbol}, V<:Union{AbstractString,Symbol}}(sj::T, py::V)
     set_pytosj(py,sj)
-#    SYMPY_TO_SJULIA_FUNCTIONS[symbol(py)] = symbol(sj)
 end
 
 ## These two functions are only used in doc.jl to look up the
@@ -368,6 +374,7 @@ pytosj_BooleanTrue(pyexpr) = true
 ####   Main _pytosj method
 ####
 function _pytosj{T <: PyCall.PyObject}(expr::T)
+    @pydebug(3, "Entering with ", expr)
     if have_function_sympy_to_sjulia_translation(expr)
         @pydebug(3, "function lookup trans. ", expr)
         return mxpr(get_function_sympy_to_sjulia_translation(expr), map(pytosj, expr[:args])...)
@@ -535,6 +542,7 @@ end
 
 # For now all infinities are mapped to one of two infinities
 function _sjtopy(mx::Mxpr{:DirectedInfinity})
+    @sjdebug(3,"Infinity ", mx)
     if mx == ComplexInfinity
         sympy.zoo
     elseif mx == MinusInfinity
@@ -583,6 +591,7 @@ function do_MeijerG(mx::Mxpr{:MeijerG}, p::Mxpr{:List}, q::Mxpr{:List}, z)
 end
 
 function _sjtopy(mx::Mxpr{:MeijerG})
+    @sjdebug(3,"MeijerG ", mx)
     pyhead = mx_to_py_dict[mhead(mx)]
     p = mx[1]
     q = mx[2]
@@ -611,6 +620,7 @@ function eval_meijerg(mx, p, q, z)
 end
 
 function _sjtopy(t::Tuple)
+    @sjdebug(3,"Tuple ", mx)
     (map(_sjtopy,t)...)
 end
 
@@ -619,6 +629,7 @@ end
 
 ## Sympy functions are called here.
 function _sjtopy(mx::Mxpr)
+    @sjdebug(3,"Mxpr ", mx)
     if mhead(mx) in keys(mx_to_py_dict)
         @sjdebug(1,"In mx_to_py_dict ", mx, " pyhead ", mx_to_py_dict[mhead(mx)] )
         return mx_to_py_dict[mhead(mx)](map(_sjtopy, mx.args)...) # calling a function in our dictionary
@@ -635,6 +646,7 @@ end
 
 # mx is a julia Symbol
 function _sjtopy(mx::Symbol)
+    @sjdebug(3,"Symbol ", mx)
     if haskey(mx_to_py_dict,mx)
         @sjdebug(1,"In mx_to_py_dixt ", mx)
         return mx_to_py_dict[mx]
@@ -672,10 +684,6 @@ function init_sympy()
     populate_special_symbol_dict()
     populate_mx_to_py_dict()
     mk_mx_to_py_funcs()
-    # jslexless{T<:PyCall.PyObject}(x::T,y::T) = true  # this is not catching what it should catch!!
-    # _jslexless{T<:PyCall.PyObject}(x::T,y::T) = true # this is not catching what it should catch!!
-    # Base.isless{T<:PyCall.PyObject}(x::T,y::T) = true     # works if I enter it by hand after the init. No idea why
-    # isless{T<:PyCall.PyObject}(x::T,y::T) = true     # works if I enter it by hand after the init. No idea why
 end
 
 #####
