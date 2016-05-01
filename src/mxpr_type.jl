@@ -536,11 +536,12 @@ function protectedsymbols()
 end
 
 # For now, we exclude Temporary symbols
+# We return symbols as strings to avoid infinite eval loops
 function usersymbols()
     args = newargs()
     for s in keys(SYMTAB)
         if  get_attribute(s,:Temporary) continue end
-        if ! haskey(system_symbols, s) push!(args,getsym(s)) end
+        if ! haskey(system_symbols, s) push!(args,string(getsym(s))) end
     end
     mx = mxpr(:List, sort!(args)...)
     setcanon(mx)

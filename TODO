@@ -5,7 +5,6 @@
    WARNING: Gamma::argr: Gamma called with two arguments; one argument is expected.
    Out(2) = Integrate(ex,t,conds => "none")
 
-
 * AC matching
 
 * Match BlankSequence and BlankNullSequence
@@ -69,6 +68,9 @@ result.
 * Map needs to take level argument, and Heads -> True   
 
 * Sympy  I * Infinity <--> DirectedInfinity[I]
+
+* @doap fails with annotated arguments. The type parameters need to be
+   quoted ors something.a   
    
 ###############################################################################
 

@@ -7,8 +7,8 @@ import Base.Test: @test
 
 # testUserSyms
 # userSymList
-# userSymList = UserSyms()
-# testUserSyms := (If( userSymList != UserSyms(), Println("**********", UserSyms())); False)
+# userSymList = Map(ToString, UserSyms())
+# testUserSyms := (If( userSymList != Map(ToString,UserSyms()), Println("**********", UserSyms())); False)
 
 include("sympy_test.jl")
 include("up_downvalues_test.jl")
