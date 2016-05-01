@@ -7,7 +7,8 @@ import SJulia: Mxpr, SJSym, SSJSym, is_Mxpr, is_Number, is_SJSym,
        mxpr, mxprcf, Infinity, getkerneloptions, unicode_output
 
 # A space, or maybe not.
-const opspc = " "
+#const opspc = " "
+opspc() = getkerneloptions(:compact_output) ? "" : " "
 
 # Julia-like syntax
 const FUNCL = '('
@@ -202,7 +203,7 @@ function show_binary(io::IO, mx::Mxpr)
         else
             show(io,lop)
         end
-        print(io, opspc, mtojsym(mhead(mx)), opspc)
+        print(io, opspc(), mtojsym(mhead(mx)), opspc())
         rop = mx[2]
         if  needsparen(rop)
             print(io,"(")
@@ -281,7 +282,7 @@ function show_infix(io::IO, mx::Mxpr)
         if np
             print(io,")")
         end
-        print(io, opspc, sepsym, opspc)
+        print(io, opspc(), sepsym, opspc())
     end
     if ! isempty(args)
         if needsparen(args[end]) #  && wantparens

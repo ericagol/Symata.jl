@@ -52,7 +52,8 @@ const Kerneloptions = Dict{Any,Any}(
                                     :unicode_output => false,
                                     :show_sympy_docs => true,
                                     :return_sympy => false,
-                                    :sympy_error => nothing
+                                    :sympy_error => nothing,
+                                    :compact_output => true
                                   )
 
 function getkerneloptions(sym::Symbol)
@@ -104,7 +105,16 @@ SymPyError() returns the most recent sympy error message. If you see a message w
 a SymPy error has occurred, you can find the detailed error message.
 "
 
-for (fn,sym) in ((:ShowSymPyDocs, :show_sympy_docs), (:UnicodeOutput, :unicode_output), (:ReturnSymPy, :return_sympy))
+#### CompactOutput
+
+@mkapprule CompactOutput  :nargs => 0:1
+
+@sjdoc CompactOutput "
+CompactOutput(True) enables printing fewer spaces between operators.
+Compact(False) is the default.
+"
+
+for (fn,sym) in ((:ShowSymPyDocs, :show_sympy_docs), (:UnicodeOutput, :unicode_output), (:ReturnSymPy, :return_sympy), (:CompactOutput, :compact_output))
     fnf = symbol("do_",fn)
     fns = string(fn)
     ssym = string(sym)
