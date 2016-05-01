@@ -506,40 +506,6 @@ function _sjtopy(mx::Mxpr{:List})
     return [map(_sjtopy, mx.args)...]
 end
 
-# This also breaks something. But, there is not test for it, apparently.
-# So, again, we wait.
-# Disable this in favor of wrapper sympy_gamma. I hope
-# This is never used. (Yes it is!)
-# function _sjtopy(mx::Mxpr{:Gamma})
-#     ma = margs(mx)
-#     if length(ma) == 1
-#         sympy.gamma(_sjtopy(ma[1]))
-#     elseif length(ma) == 2
-#         pyargs = map(_sjtopy,ma)
-#         result = sympy.uppergamma(pyargs...)
-#         result
-#     else
-#         sympy.gamma(map(_sjtopy,ma)...)
-#     end
-# end
-
-# Good disabling causes Integrate( Exp(-x^2)*Erf(x), x) to fail
-# Disable and hope we find a bug
-# This information is in several places. I am not sure why it is here.
-# function _sjtopy(mx::Mxpr{:Erf})
-#     @sjdebug(1,"Erf ", mx)
-#     ma = margs(mx)
-#     if length(ma) == 1
-#         sympy.erf(_sjtopy(ma[1]))
-#     elseif length(ma) == 2
-#         pyargs = map(_sjtopy,ma)
-#         result = erf2(pyargs...)
-#         result
-#     else
-#         sympy.erf(map(_sjtopy,ma)...)  # This will fail for sure
-#     end
-# end
-
 # For now all infinities are mapped to one of two infinities
 function _sjtopy(mx::Mxpr{:DirectedInfinity})
     @sjdebug(3,"Infinity ", mx)
@@ -625,7 +591,7 @@ function _sjtopy(t::Tuple)
 end
 
 
-######
+###############################
 
 ## Sympy functions are called here.
 function _sjtopy(mx::Mxpr)

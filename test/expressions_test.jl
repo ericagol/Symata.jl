@@ -5,13 +5,13 @@ using Base.Test
 SJulia.@ex ClearAll(a,b)
 SJulia.@ex mx = ExpandA((a+b)^3)
 SJulia.@testex  mx == Plus(Power(a,3),Times(3,Power(a,2),b),Times(3,a,Power(b,2)),Power(b,3))
-SJulia.@testex Fixed(mx) == true
+SJulia.@testex FixedQ(mx) == true
 SJulia.@ex a = 1
 SJulia.@ex mx
-SJulia.@testex Fixed(mx) == false
+SJulia.@testex FixedQ(mx) == false
 SJulia.@ex ClearAll(a)
 SJulia.@ex mx
-SJulia.@testex Fixed(mx) == true
+SJulia.@testex FixedQ(mx) == true
 
 SJulia.@ex ClearAll(a,b,c,d,z)
 SJulia.@testex ExpandA(1) == 1

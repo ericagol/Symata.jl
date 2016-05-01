@@ -13,13 +13,13 @@
 # Following depends on whether we allow protected symbols in free symbol list
 # @testex Syms(m) == HoldForm([a,b,c,d])
 @testex Syms(m) == HoldForm([Times,a,b,c,d])
-@testex Fixed(m)
+@testex FixedQ(m)
 @ex a = 1
 @ex Length(m)
-@testex Fixed(m) == false
+@testex FixedQ(m) == false
 @ex Clear(a)
 @ex Length(m)
-@testex Fixed(m)
+@testex FixedQ(m)
 @ex m = Range(10) # depends on no symbols, should never be dirty.
 @testex DirtyQ(m) == false
 @ex Clear(m)

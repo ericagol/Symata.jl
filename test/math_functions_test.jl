@@ -16,6 +16,16 @@
 #@testex isapprox(Gamma(.5), 1.772453850905516)  don't know if this is worth the trouble
 @testex Gamma(1,2) == E^(-2)
 @testex Gamma(a,0) == Gamma(a)
+
+@testex D(Gamma(x),x) == Gamma(x) * (PolyGamma(0,x))
+
+# FIXME.
+# Cutting and pasting the output of the Series
+# is not equal to the output. The ordering of terms is different.
+# No idea why.
+@testex Series(Gamma(x), [x, 0, 3])[1] == -EulerGamma
+
+
 # @testex
 # @testex
 # @testex

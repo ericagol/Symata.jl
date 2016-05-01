@@ -193,13 +193,6 @@ using Base.Test
 
 @testex 10000/Divisors(10000) == Reverse(Divisors(10000))
 
-#### Misc...
-
-@testex D(Gamma(x),x) == Gamma(x) * (PolyGamma(0,x))
-
-# FIXME. The returned expression is large. and does not '==' the
-# input. Something is not being fully evaluated when the series is returned
-@testex Series(Gamma(x), [x, 0, 3])[1] == -EulerGamma
 
 
 @ex ClearAll(x1,x2,x3,t,x)
