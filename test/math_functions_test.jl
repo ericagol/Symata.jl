@@ -11,12 +11,15 @@
 
 @testex Chop(Gamma(.5) - 1.772453850905516) == 0
 @testex Gamma(1/2) == Pi^(1/2)
+@testex Gamma(3/2) == 1/2 * (Pi ^ (1/2))
 @testex Gamma(0) == ComplexInfinity
+@testex Gamma(1) == 1
+@testex Gamma(4) == 6
 @testex Chop(Gamma(1,.5) - 0.6065306597126334) == 0
 #@testex isapprox(Gamma(.5), 1.772453850905516)  don't know if this is worth the trouble
 @testex Gamma(1,2) == E^(-2)
 @testex Gamma(a,0) == Gamma(a)
-
+@testex Gamma(a, Infinity) == 0
 @testex D(Gamma(x),x) == Gamma(x) * (PolyGamma(0,x))
 
 # FIXME.
@@ -25,6 +28,8 @@
 # No idea why.
 @testex Series(Gamma(x), [x, 0, 3])[1] == -EulerGamma
 
+# Its not clear this should be an automatic evaluation
+@testex Conjugate(Gamma(x)) == Gamma(Conjugate(x))
 
 # @testex
 # @testex
@@ -34,6 +39,6 @@
 # @testex
 # @testex 
 
-@ex ClearAll(a)
+@ex ClearAll(a,x)
 @ex If( Length(UserSyms()) > 0 ,  Println("\n**********", UserSyms(), "\n"))
 @testex Length(UserSyms()) == 0

@@ -116,7 +116,7 @@ end
 
 const single_arg_float_int_complex =
         [
-         (:conj,:Conjugate)
+         (:conj,:Conjugate,:conjugate)
          ]
 
     const single_arg_float = [(:cbrt,:CubeRoot,:cbrt),
