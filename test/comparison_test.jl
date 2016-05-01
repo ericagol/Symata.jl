@@ -1,6 +1,6 @@
 @ex ClearAll(a,b,c,d,x)
 
-@ex testUserSyms
+@testex testUserSyms
 
 @testex 1 == 1
 @testex !(1 != 1)
@@ -82,6 +82,6 @@
 
 @ex ClearAll(a,b,c,f,x)
 
-@ex testUserSyms
+@testex testUserSyms
 
 

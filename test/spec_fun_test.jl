@@ -1,4 +1,4 @@
-@ex testUserSyms
+@testex testUserSyms
 
 
 @testex ProductLog(0) === 0
@@ -8,6 +8,6 @@
 # TODO: This basically works, but we cant get the test to work
 #@testex ProductLog(0,-1) ===  DirectedInfinity(-1)
 
-@ex testUserSyms
+@testex testUserSyms
 
 

@@ -1,6 +1,6 @@
 using Base.Test
 
-@ex testUserSyms
+@testex testUserSyms
 
 @ex ClearAll(a,b)
 @ex mx = ExpandA((a+b)^3)
@@ -59,4 +59,4 @@ using Base.Test
 @testex m[3,1:10:2] == [4,12,20,28,36]
 @ex ClearAll(m)
 
-@ex testUserSyms
+@testex testUserSyms

@@ -218,6 +218,17 @@ typealias Symbolic Union{Mxpr,SJSym}
 @inline newargs{T<:Integer}(n::T) = Array(Any,n)
 @inline newargs(m::Mxpr) = newargs(length(m))
 @inline newargs(a::Array) = newargs(length(a))
+
+
+# is this just convenient ?
+function tomxprargs(args...)
+     nargs = MxprArgType[args...]
+end
+
+function tomxprargs(args::Array)
+     nargs = MxprArgType[args...]
+end
+
 @inline newsymsdict() = FreeSyms() # Dict{Symbol,Bool}()  # create dict for field syms of Mxpr
 
 @inline mhead{T<:Mxpr}(mx::T) = mx.head
@@ -357,6 +368,12 @@ end
 # Non-symbolic Heads have type GenHead, for now
 function mxpr(s,args::MxprArgs)
     mx = Mxpr{GenHead}(s,args,false,false,newsymsdict(),0,0,Any)
+    setage(mx)
+    mx
+end
+
+function mxpr(mxhead::Mxpr,args...)
+    mx = Mxpr{mxhead}(mxhead,tomxprargs(args),false,false,newsymsdict(),0,0,Any)
     setage(mx)
     mx
 end

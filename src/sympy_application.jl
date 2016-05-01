@@ -353,11 +353,14 @@ register_sjfunc_pyfunc("Cancel", "cancel")
 Collect(expr,x) collects terms involving the same power of x.
 Collect(expr,[x,y]) collects terms involving first x, then y.
 "
-apprules(mx::Mxpr{:Collect}) = do_Collect(mx,margs(mx)...)
 
-do_Collect(mx,expr,x) = sympy.collect(expr |> sjtopy, x |> sjtopy ) |> pytosj
-do_Collect(mx,expr,x,lst::Mxpr{:List}) = sympy.collect(expr |> sjtopy, x |> sjtopy , list |> sjtopy) |> pytosj
-do_Collect(mx,args...) = mx
+@mkapprule Collect
+
+#apprules(mx::Mxpr{:Collect}) = do_Collect(mx,margs(mx)...)
+
+@doap Collect(expr,x) = sympy.collect(expr |> sjtopy, x |> sjtopy ) |> pytosj
+@doap Collect(expr,x,lst::Mxpr{:List}) = sympy.collect(expr |> sjtopy, x |> sjtopy , list |> sjtopy) |> pytosj
+# @doap Collect(args...) = mx  hmmm, a better way to make the default rule ?
 
 register_sjfunc_pyfunc("Collect", "collect")
 

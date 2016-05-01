@@ -6,9 +6,7 @@
 # one part of a large expression that is 'fixed' say the part m[1] of
 # m, requires evaluating neither m nor m1, but merely retrieving m[1].
 
-@ex Clear(m,a,b,c,d)
-
-@ex testUserSyms
+@testex testUserSyms
 
 @ex m = ExpandA((a+b)^2)
 @testex Syms(m) == HoldForm([a,b])
@@ -69,5 +67,5 @@
 @testex  Args(Map( :( (x) -> typeof(x) <: Integer ) , N(h(1,2,3)))) == [True,True,True]
 
 @ex ClearAll(f,g,h,x)
-@ex testUserSyms
+@testex testUserSyms
 

@@ -1,6 +1,6 @@
 using Base.Test
 
-@ex testUserSyms
+@testex testUserSyms
 
 @testex Head(1//1) == Int64
 @testex Head(3//1) == Int64
@@ -51,4 +51,4 @@ import SJulia: mpow, mxpr
 
 @ex ClearAll(a,b)
 
-@ex testUserSyms
+@testex testUserSyms

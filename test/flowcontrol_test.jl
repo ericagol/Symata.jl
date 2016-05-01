@@ -1,6 +1,6 @@
 using Base.Test
 
-@ex testUserSyms
+@testex testUserSyms
 
 #### Do
 
@@ -126,5 +126,5 @@ using Base.Test
 
 @ex ClearAll(n,i,m)
 
-@ex testUserSyms
+@testex testUserSyms
 

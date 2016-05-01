@@ -1,5 +1,4 @@
-@ex ClearAll(f,g,x,y, gcd)
-@ex testUserSyms
+@testex testUserSyms
 
 @testex Module([], 1) == 1
 
@@ -50,4 +49,5 @@
 @ex ClearAll(f,x)
 
 @ex ClearTemporary()
-@ex testUserSyms
+@testex testUserSyms
+

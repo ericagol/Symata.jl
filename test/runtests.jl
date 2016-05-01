@@ -15,6 +15,7 @@ import Base.Test: @test
 @testex testUserSyms
 @testex testUserSyms
 
+include("integral_derivative_test.jl")
 include("output_test.jl")
 include("algebraic_transformations_test.jl")
 include("sympy_test.jl")

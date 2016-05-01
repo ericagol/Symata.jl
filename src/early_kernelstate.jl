@@ -10,6 +10,7 @@
 # Mxpr are SJulia expressions
 
 typealias MxprArgs Array{Any,1}
+typealias MxprArgType Any
 typealias FreeSyms Dict{Symbol,Bool}
 
 abstract AbstractMxpr

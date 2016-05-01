@@ -15,13 +15,13 @@
 
 @testex Collect(a*x + b*y + c*x, x) == (a + c) * x + b * y
 @testex Collect(a*x^(2*c) + b*x^(2*c), x^c) == (a + b)*(x^(2*c))
+@testex Collect(a*Exp(2*x) + b*Exp(2*x), Exp(x)) == (a + b)*(E^(2*x))
 
 # sympy does not do this unless we use Expand. Mma does the expansion
 @testex Collect(Expand((1+a+x)^4), x) == 1 + 4*a + 6*(a^2) + 4*(a^3) + a^4 + (4 + 12*a + 12*(a^2) + 4*(a^3))*x + (6 + 12*a + 6*(a^2))*(x^2) + (4 + 4*a)*(x^3) + x^4
 
-
-
-
+# This differs from sympy
+@testex Collect( a*D(f(x),x) + b*D(f(x),x), D(f(x),x))  == (D(f(x),x))*(a + b)
 
 #### Factor, Expand
 
@@ -32,5 +32,21 @@
 @testex  Factor(p) == (-3 + x) * (-2 + x) * (-1 + x) * (1 + x + x ^ 2)
 
 @ex ClearAll(a,b,c,p,x,y,f)
+
+#### Together, Apart
+
+@ex     z = ( 1/x + 1/(x+1))
+@testex Together(z) == (x ^ -1) * ((1 + x) ^ -1) * (1 + 2 * x)
+@testex Apart(Together(z)) == z
+
+## Simplify
+
+@testex Simplify( Cos(x)^2 + Sin(x)^2) == 1
+
+## FullSimplify
+
+@testex FullSimplify( -Sqrt(-2*Sqrt(2)+3)+Sqrt(2*Sqrt(2)+3) ) == 2
+
+@ex ClearAll(z,x)
 
 @testex testUserSyms

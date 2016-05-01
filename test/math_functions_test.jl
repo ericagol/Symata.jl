@@ -1,5 +1,5 @@
 
-@ex testUserSyms
+@testex testUserSyms
 
 #### Erf
 
@@ -44,4 +44,4 @@
 @testex Conjugate(Gamma(x)) == Gamma(Conjugate(x))
 
 @ex ClearAll(a,x,z)
-@ex testUserSyms
+@testex testUserSyms
