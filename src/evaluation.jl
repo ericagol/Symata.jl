@@ -57,11 +57,6 @@ macro ex(ex)   # use this macro from the julia prompt
     :(($(esc(mx))))
 end
 
-const LineNumber = Int[0]
-
-const Output = Any[]
-
-global do_we_print_outstring = true
 
 const number_of_Os = 10
 

@@ -41,6 +41,15 @@ get_try_upvalue_count() = MEVAL.try_upvalue_count
 increment_try_downvalue_count() = MEVAL.try_downvalue_count += 1
 increment_try_upvalue_count() = MEVAL.try_upvalue_count += 1
 
+##### More evaluation things
+
+const LineNumber = Int[0]
+
+const Output = Any[]
+
+global do_we_print_outstring = true
+
+
 ##### Break
 
 const FLOWFLAGS = Dict{Symbol,Bool}()
