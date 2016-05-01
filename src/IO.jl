@@ -43,6 +43,7 @@ end
 
 @sjdoc Get "
 Get(\"filename\") reads and evaluates SJulia expressions from file \"filename\".
+Try putting empty lines between expressions if you get errors on reading.
 "
 
 do_Get{T<:AbstractString}(mx::Mxpr{:Get}, fname::T) =  SJulia_eval_file(fname)
@@ -183,10 +184,12 @@ Clear(Out) clears all the saved output.
 @sjseealso(Out, Clear)
 
 function do_Out(mx::Mxpr{:Out}, n::Integer)
-    if n > 0 && n < LineNumber[1]
-        return doeval(Output[n])
-    end
-    return :Null
+    doeval(get_output_by_line(n))
+    
+    # if n > 0 && n < LineNumber[1]
+    #     return doeval(Output[n])
+    # end
+    # return :Null
 end
 
 do_Out(mx::Mxpr{:Out}, x) = :Null

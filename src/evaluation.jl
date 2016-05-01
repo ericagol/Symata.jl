@@ -71,7 +71,8 @@ macro bind_Os()
         sym =  string(Os[i])
         newex = :(
                       if (length(Output) - $i + 1) >= 1
-                         setsymval(parse($sym), Output[length(Output)-$i+1])
+#                   setsymval(parse($sym), Output[length(Output)-$i+1])
+                        setsymval(parse($sym), get_saved_output_by_index(length(Output)-$i+1))
                          set_pattributes($sym, :Protected)
                       end 
                      )
@@ -80,9 +81,7 @@ macro bind_Os()
     expr
 end
 
-get_line_number() = LineNumber[1]
-set_line_number(n::Int) =  (LineNumber[1] = n)
-increment_line_number() = LineNumber[1] += 1
+
 
 function exfunc(ex)
     check_doc_query(ex) && return nothing  # Asking for doc? Currently this is:  ?, SomeHead
@@ -102,7 +101,8 @@ function exfunc(ex)
     if isinteractive()
         set_sjulia_prompt(get_line_number() + 1)
     end
-    push!(Output,mx)
+    #    push!(Output,mx)
+    push_output(mx)
     @bind_Os
     symval(mx) == Null  && return nothing
     if isinteractive()    #  we don't need this at the moment ->   && do_we_print_outstring    

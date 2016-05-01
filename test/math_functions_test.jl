@@ -17,9 +17,6 @@
 @testex Chop(Gamma(.5) - 1.772453850905516) == 0
 @testex Gamma(1/2) == Pi^(1/2)
 @testex Gamma(3/2) == 1/2 * (Pi ^ (1/2))
-@ex Println(Gamma(0))
-@ex Println(ComplexInfinity)
-@ex Println( Gamma(0) == ComplexInfinity )
 @testex Gamma(0) == ComplexInfinity
 @testex Gamma(1) == 1
 @testex Gamma(4) == 6

@@ -43,10 +43,44 @@ increment_try_upvalue_count() = MEVAL.try_upvalue_count += 1
 
 ##### More evaluation things
 
+type SavedOutput
+    expr::Any
+    lineno::Int
+end
 const LineNumber = Int[0]
+get_line_number() = LineNumber[1]
+set_line_number(n::Int) =  (LineNumber[1] = n)
+increment_line_number() = LineNumber[1] += 1
 
-const Output = Any[]
 
+const Output = SavedOutput[]
+
+function get_saved_output_by_index(n::Int)
+    if n > 0 && n < length(Output)
+        return Output[n].expr
+    end
+    nothing
+end
+
+function push_output(expr)
+    n0 = getkerneloptions(:history_length)
+    while length(Output) >= n0
+        shift!(Output)
+    end
+    push!(Output,SavedOutput(expr,get_line_number()))
+    nothing
+end
+
+function get_output_by_line(lineno::Int)
+    idx = length(Output) - (get_line_number() - lineno)
+    if idx < length(Output) && idx > 0
+        get_saved_output_by_index(idx)
+#        Output[idx].expr
+    else
+        Null
+    end
+end
+          
 global do_we_print_outstring = true
 
 
@@ -62,7 +96,8 @@ const Kerneloptions = Dict{Any,Any}(
                                     :show_sympy_docs => true,
                                     :return_sympy => false,
                                     :sympy_error => nothing,
-                                    :compact_output => true
+                                    :compact_output => true,
+                                    :history_length => 100
                                   )
 
 function getkerneloptions(sym::Symbol)
@@ -123,7 +158,15 @@ CompactOutput(True) enables printing fewer spaces between operators.
 Compact(False) is the default.
 "
 
-for (fn,sym) in ((:ShowSymPyDocs, :show_sympy_docs), (:UnicodeOutput, :unicode_output), (:ReturnSymPy, :return_sympy), (:CompactOutput, :compact_output))
+@mkapprule HistoryLength  :nargs => 0:1
+
+@sjdoc HistoryLength "
+HistoryLength(n) enables storing the n most recent output expressions.
+HistoryLength() returns the current value.
+"
+
+for (fn,sym) in ((:ShowSymPyDocs, :show_sympy_docs), (:UnicodeOutput, :unicode_output), (:ReturnSymPy, :return_sympy), (:CompactOutput, :compact_output),
+                 (:HistoryLength, :history_length))
     fnf = symbol("do_",fn)
     fns = string(fn)
     ssym = string(sym)
@@ -141,3 +184,17 @@ for (fn,sym) in ((:SymPyError, :sympy_error),)
         ($fnf)(mx::Mxpr{symbol($fns)}) = getkerneloptions(symbol($ssym))
     end
 end    
+
+
+@doap function HistoryLength(n::Int)
+    oldn = getkerneloptions(:history_length)
+    setkerneloptions(:history_length, n)
+    for i in 1:(length(Output)-n)
+        shift!(Output)
+    end
+    oldn
+end
+
+@doap HistoryLength() = getkerneloptions(:history_length)
+
+
