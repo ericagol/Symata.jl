@@ -974,7 +974,7 @@ apprules(mx::Mxpr{:BuiltIns}) = protectedsymbols()
 UserSyms() returns a List of non-Protected symbols, which is approximately
 all user defined symbols.
 "
-apprules(mx::Mxpr{:UserSyms}) = usersymbols()
+apprules(mx::Mxpr{:UserSyms}) = usersymbolsList()
 
 @sjdoc Help "
 Help(sym) or Help(\"sym\") prints documentation for the symbol sym. Eg: Help(Expand).

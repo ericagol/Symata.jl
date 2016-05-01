@@ -24,6 +24,24 @@ function get_localized_symbol(s::Symbol)
     return gsym
 end
 
+@mkapprule ClearTemporary  :nargs => 0
+
+@sjdoc ClearTemporary "
+Remove temporary symbols, ie all beginnig with \"##\", from the symbol table.
+"
+
+# The Temporary attribute is not working. the symbols that escape are just gensysms
+@doap function ClearTemporary()
+    syms = usersymbols()
+    for sym in syms
+        ss = string(sym)
+        if length(ss) > 2 && ss[1:2] == "##"
+            delete_sym(symbol(sym))
+        end
+    end
+    Null
+end
+
 ## Macro for translation and evaluation, at repl or from file
 
 

@@ -26,7 +26,8 @@ function SJulia_eval_string(s)
         try
             SJulia.exfunc(expr) # we should use the macro here, I think.
         catch e
-            println(e)
+            println("Reading file: got error ", e)
+#            println(e)
         end
     end
     sjretval

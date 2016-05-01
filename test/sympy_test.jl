@@ -1,8 +1,8 @@
 using Base.Test
 
-@testex Length(UserSyms()) == 0
 
 @ex ClearAll(a,b,x,y,z,p,q,s,t,res,f)
+@ex testUserSyms
 
 #### Limit
 
@@ -184,8 +184,6 @@ using Base.Test
 
 
 @ex ClearAll(x1,x2,x3,t,x)
+@ex testUserSyms
 
 ################
-
-@ex If( Length(UserSyms()) > 0 ,  Println("**********", UserSyms()))
-@testex Length(UserSyms()) == 0

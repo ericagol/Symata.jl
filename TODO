@@ -44,6 +44,9 @@ result.
  expression for, eg Integrate(x + c). Probably has to do
  with changing the REPL parsing code.
 
+* Can't throw or handle exceptions correctly when translating AST.
+   Find out why.
+   
 * Error messages have become shorter and more cryptic. Why
   e.g MethodError(SJulia._do_Comparison,(ex,==,((-1 + x) ^ 2) * (1 + 2 * x + 2 * (x ^ 2) + x ^ 3)))
   when comparing unbound symbol to polynomial

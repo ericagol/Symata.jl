@@ -1,7 +1,6 @@
 using Base.Test
 
-@ex If( Length(UserSyms()) > 0 ,  Println("\n**********", UserSyms(), "\n"))
-@testex Length(UserSyms()) == 0
+@ex testUserSyms
 
 @ex      ClearAll(a,x,y)
 
@@ -55,5 +54,5 @@ SJulia.@testex(  m = Range(x, x + 5) == [x,1 + x,2 + x,3 + x,4 + x,5 + x])
 @testex a[3] == 1 + d^2
 
 @ex ClearAll(a,d,i)
-@ex If( Length(UserSyms()) > 0 ,  Println("**********", UserSyms()))
-@testex Length(UserSyms()) == 0
+@ex testUserSyms
+

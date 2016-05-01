@@ -1,5 +1,5 @@
-@ex If( Length(UserSyms()) > 0 ,  Println("\n**********", UserSyms(), "\n"))
-@testex Length(UserSyms()) == 0
+
+@ex testUserSyms
 
 #### Erf
 
@@ -44,5 +44,4 @@
 @testex Conjugate(Gamma(x)) == Gamma(Conjugate(x))
 
 @ex ClearAll(a,x,z)
-@ex If( Length(UserSyms()) > 0 ,  Println("\n**********", UserSyms(), "\n"))
-@testex Length(UserSyms()) == 0
+@ex testUserSyms

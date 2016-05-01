@@ -1,12 +1,15 @@
 #### Fixed point evaluation
 
-@testex Length(UserSyms()) == 0
+
 # Test that timestamp of symbols that an expression depends on are
 # tracked and used correctly. This means, in particular that getting
 # one part of a large expression that is 'fixed' say the part m[1] of
 # m, requires evaluating neither m nor m1, but merely retrieving m[1].
 
 @ex Clear(m,a,b,c,d)
+
+@ex testUserSyms
+
 @ex m = ExpandA((a+b)^2)
 @testex Syms(m) == HoldForm([a,b])
 @ex m = ExpandA((a*c + b*d)^2)
@@ -66,5 +69,5 @@
 @testex  Args(Map( :( (x) -> typeof(x) <: Integer ) , N(h(1,2,3)))) == [True,True,True]
 
 @ex ClearAll(f,g,h,x)
+@ex testUserSyms
 
-@testex Length(UserSyms()) == 0

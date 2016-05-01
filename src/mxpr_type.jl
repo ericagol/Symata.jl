@@ -187,6 +187,10 @@ end
     nothing
 end
 
+function delete_sym(s::AbstractString)
+    delete_sym(symbol(s))
+end
+
 ##################################################################
 # Mxpr                                                           #
 # All SJulia expressions are represented by instances of Mxpr    #
@@ -537,7 +541,7 @@ end
 
 # For now, we exclude Temporary symbols
 # We return symbols as strings to avoid infinite eval loops
-function usersymbols()
+function usersymbolsList()
     args = newargs()
     for s in keys(SYMTAB)
         if  get_attribute(s,:Temporary) continue end
@@ -547,6 +551,15 @@ function usersymbols()
     setcanon(mx)
     setfixed(mx)
     mx
+end
+
+function usersymbols()
+    args = newargs()
+    for s in keys(SYMTAB)
+        if  get_attribute(s,:Temporary) continue end
+        if ! haskey(system_symbols, s) push!(args,string(getsym(s))) end
+    end
+    return args
 end
 
 # For Heads that are not symbols
