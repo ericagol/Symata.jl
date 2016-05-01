@@ -103,10 +103,65 @@ end
 # @doap function Headname{T<:SomeType}(x,y::T) = ...
 # etc.
 
+function quotesymbol(sym)
+    QuoteNode(sym)
+end
+
 macro doap(func)
-    prototype = func.args[1].args     # eg.  Headname{T,V}(x::T,y::V)
-    sj_func_name = prototype[1]       #      Headname{T,V}
-    new_func_name = symbol("do_",sj_func_name)  # do_Headname{T,V}
+    prototype = func.args[1].args
+    sj_func_name0 = prototype[1]
+    local sj_func_name
+    if isa(sj_func_name0, Expr)
+        if ( sj_func_name0.head == :curly )
+            sj_func_name = sj_func_name0.args[1]
+            new_func_name = symbol("do_",sj_func_name)
+            sj_func_name0.args[1] = new_func_name            
+        else
+            error("Can't interpret ", sj_func_name)
+        end
+    else
+        sj_func_name = sj_func_name0
+        new_func_name = symbol("do_",sj_func_name)
+        prototype[1] = new_func_name        
+    end
+#    println("sj func name ", sj_func_name)
+    local quote_sj_func_name
+    if isa(sj_func_name,Symbol)
+        quote_sj_func_name = quotesymbol(sj_func_name)
+    elseif isa(sj_func_name,Expr)
+        quote_sj_func_name = quotesymbol(sj_func_name.args[1])
+    else
+        error("doap: Can't interpret ", sj_func_name)
+    end
+    mxarg =  :( mx::Mxpr{$quote_sj_func_name}  )
+    insert!(prototype,2, mxarg)
+#    dump(func)
+#    println()
+#    dump(prototype)
+#    println(">\n", new_func_name, "\n")
+#    println(">\n", func, "\n")
+#    dump(mxarg)
+    #    dump(sj_func_name)
+ :(($(esc(func))))    
+end
+
+macro doap2(func)
+    prototype = func.args[1].args      # eg.  Headname{T,V}(x::T,y::V) or Headname(x,y)
+    sj_func_name0 = prototype[1]       #      Headname{T,V}, or Headname
+    if isa(sj_func_name0, Expr)        # got  Headname{T,V}
+        if ( sj_func_name0.head == :curly )
+            sj_func_name = sj_func_name0.args[1]       #   get Headname
+            new_func_name = symbol("do_",sj_func_name) #  Headname --> do_Headname
+            sj_func_name0.args[1] = new_func_name      #  replace Headname{T,V} -> do_Headname{T,V}      
+        else
+            error("Can't interpret ", sj_func_name)
+        end
+    else                                             # got Headname(x,y)
+        sj_func_name = sj_func_name0                 
+        new_func_name = symbol("do_",sj_func_name)   # do_Headname
+        prototype[1] = new_func_name                 # replace Headname --> do_Headname
+    end
+#    new_func_name = symbol("do_",sj_func_name)  # do_Headname{T,V}
     local quote_sj_func_name
     if isa(sj_func_name,Symbol)
         quote_sj_func_name = QuoteNode(sj_func_name)         # :Headname from prototype like Headname(args...)
@@ -118,7 +173,8 @@ macro doap(func)
     mxarg =  :( mx::Mxpr{$quote_sj_func_name}  )             # mx::Mxpr{:Headname}
     insert!(prototype,2, mxarg)                              # insert mx::Mxpr{:Headname} as the first argument in prototype
     prototype[1] = new_func_name                             # replace Headname with do_Headname
-    func                                                     # return the rewritten function
+#    func                                                    # return the rewritten function
+    :(($(esc(func))))
 end
 
 #### Default apprule

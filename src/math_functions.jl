@@ -487,7 +487,7 @@ set_sjtopy(:Erf, :sympy_erf)
 
 @mkapprule InverseErf :nargs => 1:2
 
-do_InverseErf{T<:AbstractFloat}(mx::Mxpr{:InverseErf}, x::T) = x < 1 && x > -1 ? erfinv(x) : mx
+@doap InverseErf{T<:AbstractFloat}(x::T) = x < 1 && x > -1 ? erfinv(x) : mx
 @doap InverseErf(x) = pytosj(sympy.erfinv(sjtopy(x)))
 @doap InverseErf(x,y) = pytosj(sympy.erf2inv(sjtopy(x),sjtopy(y)))
 
