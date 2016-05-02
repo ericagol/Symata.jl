@@ -107,7 +107,12 @@ function Base.show{T<:Integer}(io::IO, z::Complex{T})
     if imag(z) == 1
         print(io,Istring())
     else
-        show(io,imag(z))
+        iz = imag(z)
+        if iz == -1
+            print(io,"-")
+        else
+            show(io,iz)
+        end
         print(io,Istring())
     end
 end
