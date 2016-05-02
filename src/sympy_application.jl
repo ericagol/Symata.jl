@@ -33,7 +33,8 @@ end
 #### Factor
 
 @sjdoc Factor "
-Factor(expr) factors expr. This function calls SymPy.
+Factor(expr) factors expr. Options are,  modulus, gaussian, extension, and domain.
+For example modulus => n, gaussian => False, extention => Sqrt(2).
 "
 
 @make_simplify_func :Factor factor

@@ -30,6 +30,10 @@
 @ex      p = Expand((x-1)*(x-2)*(x-3)*(x^2 + x + 1))
 @testex  p == -6 + 5 * x + -1 * (x ^ 2) + 6 * (x ^ 3) + -5 * (x ^ 4) + x ^ 5
 @testex  Factor(p) == (-3 + x) * (-2 + x) * (-1 + x) * (1 + x + x ^ 2)
+@testex  Factor(2*x^5 + 2*x^4*y + 4*x^3 + 4*x^2*y + 2*x + 2*y) == 2*((1 + x^2)^2)*(x + y)
+@testex  Factor(x^2 + 1, modulus => 2) == (1 + x)^2
+@testex  Factor(x^2 + 1, gaussian => True) == (-1I + x)*(I + x)
+# @testex  Factor(x^2 - 2, extension => Sqrt(2))  FIXME. raises exception
 
 @ex ClearAll(a,b,c,p,x,y,f)
 
@@ -48,7 +52,7 @@
 
 @testex Together(Exp(1/x + 1/y), deep => True) == E^((x^(-1))*(y^(-1))*(x + y))
 @testex Together(Exp(1/x + 1/y)) == E^(x^(-1) + y^(-1))
-
+@testex Factor((x^2 - 1)/(x^2 + 4*x + 4)) == (-1 + x)*(1 + x)*((2 + x)^(-2))
 
 ## Simplify
 
@@ -62,6 +66,6 @@
 
 
 
-@ex ClearAll(x,y,z,deep)
+@ex ClearAll(x,y,z,deep, gaussian, modulus)
 
 @testex testUserSyms
