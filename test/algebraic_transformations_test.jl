@@ -53,10 +53,14 @@
 ## Simplify
 
 @testex Simplify( Cos(x)^2 + Sin(x)^2) == 1
+@testex Simplify( (x + x^2)/(x*Sin(y)^2 + x*Cos(y)^2) ) == 1 + x
+@testex Cancel(TrigSimp((x + x^2)/(x*Sin(y)^2 + x*Cos(y)^2))) == 1 + x
 
 ## FullSimplify
 
 @testex FullSimplify( -Sqrt(-2*Sqrt(2)+3)+Sqrt(2*Sqrt(2)+3) ) == 2
+
+
 
 @ex ClearAll(x,y,z,deep)
 
