@@ -35,9 +35,17 @@
 
 #### Together, Apart
 
+# Note, Mma and others have this FullForm, but display a 1/(x*y), etc.
 @ex     z = ( 1/x + 1/(x+1))
 @testex Together(z) == (x ^ -1) * ((1 + x) ^ -1) * (1 + 2 * x)
 @testex Apart(Together(z)) == z
+@ex     ClearAll(z)
+@testex Together(1/x + 1/y + 1/z) == (x^(-1))*(y^(-1))*(z^(-1))*(x*y + x*z + y*z)
+@testex Together(1/(x*y) + 1/y^2) == (x^(-1))*(y^(-2))*(x + y)
+@testex Together(1/(1 + 1/x) + 1/(1 + 1/y)) == ((1 + x)^(-1))*((1 + y)^(-1))*(x*(1 + y) + (1 + x)*y)
+@testex Together(1/Exp(x) + 1/(x*Exp(x))) == (E^(-x))*(x^(-1))*(1 + x)
+@testex Together(1/Exp(2*x) + 1/(x*Exp(3*x))) == (E^((-3)*x))*(x^(-1))*(1 + (E^x)*x)
+
 
 ## Simplify
 
@@ -47,6 +55,6 @@
 
 @testex FullSimplify( -Sqrt(-2*Sqrt(2)+3)+Sqrt(2*Sqrt(2)+3) ) == 2
 
-@ex ClearAll(z,x)
+@ex ClearAll(x,y,z)
 
 @testex testUserSyms
