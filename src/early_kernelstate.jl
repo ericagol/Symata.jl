@@ -73,8 +73,15 @@ typealias SJSym Symbol
 #### Symbol Table
 
 ## symbol table for SJulia symbols
-const SYMTAB = Dict{Symbol,SSJSym}()
-const SYMVALTAB = Dict{Symbol,Any}()  # experiment with keep values elsewhere
+
+newsymtable() = Dict{Symbol,SSJSym}()
+
+const SYMTAB = newsymtable()
+#const SYMVALTAB = Dict{Symbol,Any}()  # experiment with keep values elsewhere
+
+const SYMTABLES = Dict{Symbol,Dict{Symbol,SSJSym}}()
+SYMTABLES[:System] = SYMTAB
+SYMTABLES[:Global] = newsymtable()
 
 #### Evalage
 
