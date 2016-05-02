@@ -41,7 +41,10 @@ fullform(x) = fullform(STDOUT,x)
 
 needsparen(x::Mxpr) = length(x) > 1
 needsparen{T<:Integer}(x::Rational{T}) = true
-needsparen{T<:Integer}(x::T) = x < 0
+
+# rational does as well !?
+#needsparen{T<:Integer}(x::T) = x < 0
+
 needsparen{T<:Real}(x::Complex{T}) = true
 needsparen(x) = false
 
@@ -272,7 +275,7 @@ function show_infix(io::IO, mx::Mxpr)
     for i in startind:length(args)-1
         arg = args[i]
 #        if needsparen(args[i]) && i>1 # && wantparens
-        if needsparen(arg) && !atomq( # when did we put this i> 1 in ?? it breaks stuff
+        if needsparen(arg)  # && ! (atomq(arg) && i> 1)  #  when did we put this i> 1 in ?? it breaks stuff
             np = true
             print(io,"(")
         else
