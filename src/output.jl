@@ -45,6 +45,7 @@ needsparen{T<:Integer}(x::Rational{T}) = true
 # rational does as well !?
 #needsparen{T<:Integer}(x::T) = x < 0
 
+needsparen{T<:Integer}(x::Complex{T}) = real(x) != 0
 needsparen{T<:Real}(x::Complex{T}) = true
 needsparen(x) = false
 
