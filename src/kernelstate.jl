@@ -153,8 +153,8 @@ a SymPy error has occurred, you can find the detailed error message.
 @mkapprule CompactOutput  :nargs => 0:1
 
 @sjdoc CompactOutput "
-CompactOutput(True) enables printing fewer spaces between operators.
-Compact(False) is the default.
+CompactOutput(True) (default) enables printing fewer spaces between operators.
+Compact() returns the current state.
 "
 
 @mkapprule HistoryLength  :nargs => 0:1

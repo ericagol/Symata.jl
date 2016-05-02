@@ -46,6 +46,9 @@
 @testex Together(1/Exp(x) + 1/(x*Exp(x))) == (E^(-x))*(x^(-1))*(1 + x)
 @testex Together(1/Exp(2*x) + 1/(x*Exp(3*x))) == (E^((-3)*x))*(x^(-1))*(1 + (E^x)*x)
 
+@testex Together(Exp(1/x + 1/y), deep => True) == E^((x^(-1))*(y^(-1))*(x + y))
+@testex Together(Exp(1/x + 1/y)) == E^(x^(-1) + y^(-1))
+
 
 ## Simplify
 
@@ -55,6 +58,6 @@
 
 @testex FullSimplify( -Sqrt(-2*Sqrt(2)+3)+Sqrt(2*Sqrt(2)+3) ) == 2
 
-@ex ClearAll(x,y,z)
+@ex ClearAll(x,y,z,deep)
 
 @testex testUserSyms

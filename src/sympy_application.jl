@@ -272,9 +272,17 @@ register_sjfunc_pyfunc("D", "diff")
 @sjdoc Together "
 Together(sum) rewrites a sum of terms as a product.
 "
-apprules(mx::Mxpr{:Together}) = mx[1] |> sjtopy |> sympy.together |> pytosj
 
-register_sjfunc_pyfunc("Together", "together")
+@make_simplify_func :Together together
+
+#@mkapprule Together :options => Dict( :deep => false )
+
+#@mkapprule Together
+#@doap Together(expr) = expr |> sjtopy |> sympy.together |> pytosj
+#do_Together(mx::Mxpr{:Together}, expr; kws...) = expr |> sjtopy |> sympy.together |> pytosj
+
+# apprules(mx::Mxpr{:Together}) = mx[1] |> sjtopy |> sympy.together |> pytosj
+# register_sjfunc_pyfunc("Together", "together")
 
 #### Apart
 
