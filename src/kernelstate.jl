@@ -45,8 +45,8 @@ increment_try_upvalue_count() = MEVAL.try_upvalue_count += 1
 
 type SavedOutput
     expr::Any
-    lineno::Int
 end
+
 const LineNumber = Int[0]
 get_line_number() = LineNumber[1]
 set_line_number(n::Int) =  (LineNumber[1] = n)
@@ -67,7 +67,7 @@ function push_output(expr)
     while length(Output) >= n0
         shift!(Output)
     end
-    push!(Output,SavedOutput(expr,get_line_number()))
+    push!(Output,SavedOutput(expr))
     nothing
 end
 
