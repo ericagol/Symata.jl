@@ -20,7 +20,7 @@
 # sympy does not do this unless we use Expand. Mma does the expansion
 @testex Collect(Expand((1+a+x)^4), x) == 1 + 4*a + 6*(a^2) + 4*(a^3) + a^4 + (4 + 12*a + 12*(a^2) + 4*(a^3))*x + (6 + 12*a + 6*(a^2))*(x^2) + (4 + 4*a)*(x^3) + x^4
 
-# This differs from sympy
+# This differs from sympy. We can't quite do Derivative(1)f yet
 @testex Collect( a*D(f(x),x) + b*D(f(x),x), D(f(x),x))  == (D(f(x),x))*(a + b)
 
 #### Factor, Expand

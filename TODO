@@ -64,7 +64,10 @@ result.
 
 * Map needs to take level argument, and Heads -> True   
 
-* Derivative. Expressions with expressions as the head. How will this ?
+* Derivative. Expressions with expressions as the head. Implemented
+   but disabled because it breaks things.
+
+* O, OO, have problems. Need to evaluate them automatically
    
 ###############################################################################
 

@@ -65,16 +65,19 @@ for i in 1:number_of_Os
     push!(Os, symbol("O"^i))
 end
 
+# Bind O to O(n), where n is the most recent line number.
+# Bind OO to O(n-1), etc.  When O evaluates to Out(n), the Out rule evaluate
+# the expression bound to Out(n).
 macro bind_Os()
     expr = Expr(:block)
     for i in 1:number_of_Os
         sym =  string(Os[i])
         newex = :(
-                      if (length(Output) - $i + 1) >= 1
-#                   setsymval(parse($sym), Output[length(Output)-$i+1])
-                        setsymval(parse($sym), get_saved_output_by_index(length(Output)-$i+1))
-                         set_pattributes($sym, :Protected)
-                      end 
+                  if (length(Output) - $i + 1) >= 1
+                       oexp = mxpr(:Out, get_line_number() - $i + 1)
+                       setsymval(parse($sym), oexp)
+                       set_pattributes($sym, :Protected)
+                  end 
                      )
         push!(expr.args, newex)
     end
@@ -101,7 +104,6 @@ function exfunc(ex)
     if isinteractive()
         set_sjulia_prompt(get_line_number() + 1)
     end
-    #    push!(Output,mx)
     push_output(mx)
     @bind_Os
     symval(mx) == Null  && return nothing

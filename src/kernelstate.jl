@@ -56,7 +56,7 @@ increment_line_number() = LineNumber[1] += 1
 const Output = SavedOutput[]
 
 function get_saved_output_by_index(n::Int)
-    if n > 0 && n < length(Output)
+    if n > 0 && n <= length(Output)
         return Output[n].expr
     end
     nothing
@@ -73,9 +73,8 @@ end
 
 function get_output_by_line(lineno::Int)
     idx = length(Output) - (get_line_number() - lineno)
-    if idx < length(Output) && idx > 0
-        get_saved_output_by_index(idx)
-#        Output[idx].expr
+    if idx <= length(Output) && idx > 0
+        res = get_saved_output_by_index(idx)
     else
         Null
     end

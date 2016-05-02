@@ -183,15 +183,7 @@ Clear(Out) clears all the saved output.
 
 @sjseealso(Out, Clear)
 
-function do_Out(mx::Mxpr{:Out}, n::Integer)
-    doeval(get_output_by_line(n))
-    
-    # if n > 0 && n < LineNumber[1]
-    #     return doeval(Output[n])
-    # end
-    # return :Null
-end
-
+do_Out(mx::Mxpr{:Out}, n::Integer) = doeval(get_output_by_line(n))
 do_Out(mx::Mxpr{:Out}, x) = :Null
 
 # We should probably explicitly return Null
