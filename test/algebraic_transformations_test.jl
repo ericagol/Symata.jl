@@ -27,13 +27,21 @@
 
 @testex  Factor(Expand( (a+b)^2 )) == (a+b)^2
 @testex  Expand( (a + f(x)) ^2 ) == a ^ 2 + 2 * a * f(x) + f(x) ^ 2
+@testex  Expand(  (x+y+z)^2 ) == x^2 + 2*x*y + y^2 + 2*x*z + 2*y*z + z^2
+@testex  Expand( Exp(x+y) ) == (E^x)*(E^y)
+
+
 @ex      p = Expand((x-1)*(x-2)*(x-3)*(x^2 + x + 1))
 @testex  p == -6 + 5 * x + -1 * (x ^ 2) + 6 * (x ^ 3) + -5 * (x ^ 4) + x ^ 5
+
 @testex  Factor(p) == (-3 + x) * (-2 + x) * (-1 + x) * (1 + x + x ^ 2)
 @testex  Factor(2*x^5 + 2*x^4*y + 4*x^3 + 4*x^2*y + 2*x + 2*y) == 2*((1 + x^2)^2)*(x + y)
 @testex  Factor(x^2 + 1, modulus => 2) == (1 + x)^2
 @testex  Factor(x^2 + 1, gaussian => True) == (-1I + x)*(I + x)
 # @testex  Factor(x^2 - 2, extension => Sqrt(2))  FIXME. raises exception
+@testex  Factor((x^2 + 4*x + 4)^10000000*(x^2 + 1)) == ((2 + x)^20000000)*(1 + x^2)
+@testex  Factor( 2^(x^2 + 2*x + 1), deep => True ) == 2^((1 + x)^2)
+
 
 @ex ClearAll(a,b,c,p,x,y,f)
 
