@@ -37,13 +37,20 @@
 @testex  Factor(p) == (-3 + x) * (-2 + x) * (-1 + x) * (1 + x + x ^ 2)
 @testex  Factor(2*x^5 + 2*x^4*y + 4*x^3 + 4*x^2*y + 2*x + 2*y) == 2*((1 + x^2)^2)*(x + y)
 @testex  Factor(x^2 + 1, modulus => 2) == (1 + x)^2
+@testex  Factor(x^10 - 1, modulus => 2) == ((1 + x)^2)*((1 + x + x^2 + x^3 + x^4)^2)
 @testex  Factor(x^2 + 1, gaussian => True) == (-1I + x)*(I + x)
 # @testex  Factor(x^2 - 2, extension => Sqrt(2))  FIXME. raises exception
 @testex  Factor((x^2 + 4*x + 4)^10000000*(x^2 + 1)) == ((2 + x)^20000000)*(1 + x^2)
 @testex  Factor( 2^(x^2 + 2*x + 1), deep => True ) == 2^((1 + x)^2)
 
-
 @ex ClearAll(a,b,c,p,x,y,f)
+
+#### ExpandFunc
+
+@testex  ExpandFunc(Gamma(x+2)) == x*Gamma(x)*(1 + x)
+@testex  Simplify(x*Gamma(x)*(1 + x)) == Gamma(x+2)
+# FIXME  Canononical order should be  x*(1+x)*Gamma(x).  We get x*Gamma(x)*(1+x)
+
 
 #### Together, Apart
 
@@ -62,18 +69,23 @@
 @testex Together(Exp(1/x + 1/y)) == E^(x^(-1) + y^(-1))
 @testex Factor((x^2 - 1)/(x^2 + 4*x + 4)) == (-1 + x)*(1 + x)*((2 + x)^(-2))
 
-## Simplify
+#### TrigSimp
+
+@testex TrigSimp(2*Sin(x)^2 + 2* Cos(x)^2) == 2
+@testex TrigSimp(f(2*Sin(x)^2 + 2* Cos(x)^2)) == f(2)
+@testex TrigSimp( 3*Tanh(x)^7 - 2/Coth(x)^7) == Tanh(x)^7
+
+#### Simplify
 
 @testex Simplify( Cos(x)^2 + Sin(x)^2) == 1
 @testex Simplify( (x + x^2)/(x*Sin(y)^2 + x*Cos(y)^2) ) == 1 + x
 @testex Cancel(TrigSimp((x + x^2)/(x*Sin(y)^2 + x*Cos(y)^2))) == 1 + x
 
-## FullSimplify
+#### FullSimplify
 
 @testex FullSimplify( -Sqrt(-2*Sqrt(2)+3)+Sqrt(2*Sqrt(2)+3) ) == 2
 
 
-
-@ex ClearAll(x,y,z,deep, gaussian, modulus)
+@ex ClearAll(x,y,z,f,deep,gaussian,modulus)
 
 @testex testUserSyms

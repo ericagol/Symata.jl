@@ -269,16 +269,16 @@ function show_infix(io::IO, mx::Mxpr)
         print(io, "-")
         startind = 2
     end
-#    println("startind ", startind)
     for i in startind:length(args)-1
+        arg = args[i]
 #        if needsparen(args[i]) && i>1 # && wantparens
-        if needsparen(args[i])  # when did we put this i> 1 in ?? it breaks stuff
+        if needsparen(arg) && !atomq( # when did we put this i> 1 in ?? it breaks stuff
             np = true
             print(io,"(")
         else
             np = false
         end
-        show(io,args[i])
+        show(io,arg)
         if np
             print(io,")")
         end
