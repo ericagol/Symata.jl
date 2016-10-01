@@ -1,5 +1,8 @@
 using PyCall
 
+const sympy  = PyCall.PyNULL()
+const mpmath = PyCall.PyNULL()
+
 import Base: isless
 
 # We no longer have a module here.
@@ -18,9 +21,10 @@ import Base: isless
 # Francesco Bonazzi contributed code for an early version of this file.
 
 function import_sympy()
-    @eval @pyimport sympy
-    @eval @pyimport sympy.core as sympy_core
-    @eval @pyimport mpmath
+    copy!(sympy, PyCall.pyimport_conda("sympy", "sympy"))
+    # @eval @pyimport sympy
+    # @eval @pyimport sympy.core as sympy_core
+    # @eval @pyimport mpmath
 end
 
 const PYDEBUGLEVEL = -1
@@ -758,8 +762,10 @@ end
 # We call init_sympy() from __init__
 function init_sympy()
     import_sympy()
-    eval(parse("const dummy_arg = sympy.Symbol(\"DUMMY\")"))
-    eval(parse("const SymPyMinusInfinity = sympy.Mul(-1 , sympy.oo)"))
+#    eval(parse("const dummy_arg = sympy.Symbol(\"DUMMY\")"))
+    eval(parse("const dummy_arg = sympy[:Symbol](\"DUMMY\")"))    
+#    eval(parse("const SymPyMinusInfinity = sympy.Mul(-1 , sympy.oo)"))
+    eval(parse("const SymPyMinusInfinity = sympy[:Mul](-1 , sympy.oo)"))    
     make_sympy_to_sjulia()
     populate_py_to_mx_dict()
     mk_py_to_mx_funcs()
