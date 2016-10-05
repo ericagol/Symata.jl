@@ -25,7 +25,7 @@ function SJulia_parse_REPL_line(line)
     line = sjpreprocess_interactive(line)
     #    println("Preprocessed line '$line'")
     Base.syntax_deprecation_warnings(false) do
-        Base.parse_input_line("@SJulia.ex " * line)
+        Base.parse_input_line("@Symata.ex " * line)
     end
 end
 
