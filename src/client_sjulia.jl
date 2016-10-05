@@ -120,7 +120,8 @@ function  set_sjulia_prompt{T<:AbstractString}(s::T)
     (SJulia.sjulia_repl_mode().prompt = s)
 end
 
-set_sjulia_prompt(n::Int) = set_sjulia_prompt("sjulia " * string(n) * "> ")
+#set_sjulia_prompt(n::Int) = set_sjulia_prompt("sjulia " * string(n) * "> ")
+set_sjulia_prompt(n::Int) = set_sjulia_prompt("symata " * string(n) * "> ")
 get_sjulia_prompt(s::AbstractString) = SJulia.sjulia_repl_mode().prompt
 
 function sjulia_repl()
