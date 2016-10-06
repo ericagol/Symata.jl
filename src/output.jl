@@ -96,7 +96,7 @@ function Base.show(io::IO, s::SJSym)
 end
 
 # Overwrite Base definition
-function Base.show(io::IO, x::Rational)
+function stshow(io::IO, x::Rational)
     show(io, num(x))
     print(io, "/")
     show(io, den(x))
