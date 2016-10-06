@@ -54,14 +54,7 @@ function stshow(io::IO, mime::MIME"text/plain", x)
     stshow(io::IO, x)
 end
 
-function stshow(io::IO, x::Rational)
-    show(io, num(x))
-    print(io, "/")
-    show(io, den(x))
-end
-
 function symata_display(args...)
-#    println("plain display, ", length(args))
     display(args...)
 end
 symata_display(d::Display, mime::AbstractString, x) = symata_display(d, MIME(mime), x)
@@ -79,17 +72,6 @@ end
 
 symata_display(d::REPLDisplay, x) = symata_display(d, MIME("text/plain"), x)
 
-# macro try_display(expr)
-#     println("HERE", expr)
-#   quote
-#     try $(esc(expr))
-#     catch e
-#       isa(e, MethodError) && e.f in (display, redisplay, show) ||
-#         rethrow()
-#     end
-#   end
-# end
-
 function symata_display(x)
     for i = length(displays):-1:1
         xdisplayable(displays[i], x) &&
@@ -105,8 +87,6 @@ function symata_display(m::MIME, x)
     end
     throw(MethodError(display, (m, x)))
 end
-
-
 
 function symata_print_response(errio::IO, val::ANY, bt, show_value::Bool, have_color::Bool, specialdisplay=nothing)
 #    println("showing HERE")

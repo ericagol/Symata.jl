@@ -377,6 +377,20 @@ Collect(expr,[x,y]) collects terms involving first x, then y.
 
 register_sjfunc_pyfunc("Collect", "collect")
 
+#### Refine
+
+@mkapprule Refine
+
+# Why and how is this defined more than once ? I can't find the other definintion
+@doap function Refine(args...)
+    result = sympy[:refine](map(sjtopy, args)...)
+    result |> pytosj
+end
+
+@sjdoc Refine "
+Refine(expr) simplifies expr using assumptions. For instance, `Assume(x,positive)`.
+"
+
 #### Solve
 
 @sjdoc Solve "
@@ -483,18 +497,6 @@ end
 @doap ConditionalExpression(expr, cond::Bool) = cond ? expr : Undefined
 @doap ConditionalExpression(expr, cond) = mx
 
-#### Refine
-
-@mkapprule Refine
-
-@sjdoc Refine "
-Refine(expr) simplifies expr using assumptions. For instance, `Assume(x,positive)`.
-"
-
-@doap function Refine(args...)
-    result = sympy[:refine](map(sjtopy, args)...)
-    result |> pytosj
-end
 
 ## utility
 
