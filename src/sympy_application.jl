@@ -379,17 +379,13 @@ register_sjfunc_pyfunc("Collect", "collect")
 
 #### Refine
 
-@mkapprule Refine
-
-# Why and how is this defined more than once ? I can't find the other definintion
-@doap function Refine(args...)
-    result = sympy[:refine](map(sjtopy, args)...)
-    result |> pytosj
-end
+@mkapprule Refine  :nodefault => true
 
 @sjdoc Refine "
 Refine(expr) simplifies expr using assumptions. For instance, `Assume(x,positive)`.
 "
+
+@doap  Refine(args...) =  sympy[:refine](map(sjtopy, args)...) |> pytosj
 
 #### Solve
 

@@ -63,7 +63,6 @@ symata_display(d::TextDisplay, M::MIME"text/plain", x) = stshow(d.io, M, x)
 symata_display(d::TextDisplay, x) = symata_display(d, MIME"text/plain"(), x)
 
 function symata_display(d::REPLDisplay, mime::MIME"text/plain", x)
-#    println("symata display ", x)    
     io = outstream(d.repl)
     Base.have_color && write(io, answer_color(d.repl))
     stshow(IOContext(io, :limit => true), mime, x)    
@@ -89,7 +88,6 @@ function symata_display(m::MIME, x)
 end
 
 function symata_print_response(errio::IO, val::ANY, bt, show_value::Bool, have_color::Bool, specialdisplay=nothing)
-#    println("showing HERE")
     Base.sigatomic_begin()
     while true
         try
@@ -132,19 +130,14 @@ type SymataCompletionProvider <: CompletionProvider
 end
 
 function Symata_parse_REPL_line(line)
-#    println("Input line '$line'")
     line = sjpreprocess_interactive(line)
-    #    println("Preprocessed line '$line'")
     Base.syntax_deprecation_warnings(false) do
         Base.parse_input_line("@Symata.ex " * line)
     end
 end
 
-
-
 function symatarespond(f, repl, main; pass_empty = false)
     (s,buf,ok)->begin
-#        println("show 3")
         if !ok
             return transition(s, :abort)
         end
