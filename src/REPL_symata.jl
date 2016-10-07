@@ -244,7 +244,6 @@ end
 
 function RunSymataREPL(repl::LineEditREPL)
 
-    println("starting repl")
     # Completion list for Symata
     populate_builtins()
 
@@ -325,6 +324,7 @@ function symata_run_frontend(repl::LineEditREPL, backend)
     dopushdisplay && popdisplay(d)
 end
 
+# TODO use our duplicated output routines
 function symata_run_frontend(repl::BasicREPL, backend::REPLBackendRef)
     d = REPLDisplay(repl)
     dopushdisplay = !in(d,Base.Multimedia.displays)
@@ -407,6 +407,7 @@ function symata_run_frontend(repl::StreamREPL, backend::REPLBackendRef)
 end
 
 function symata_setup_interface(repl::LineEditREPL; hascolor = repl.hascolor, extra_repl_keymap = Dict{Any,Any}[])
+    println("Setup interface")
     ###
     #
     # This function returns the main interface that describes the REPL
