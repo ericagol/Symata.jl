@@ -407,7 +407,6 @@ function symata_run_frontend(repl::StreamREPL, backend::REPLBackendRef)
 end
 
 function symata_setup_interface(repl::LineEditREPL; hascolor = repl.hascolor, extra_repl_keymap = Dict{Any,Any}[])
-    println("Setup interface")
     ###
     #
     # This function returns the main interface that describes the REPL
@@ -466,7 +465,7 @@ function symata_setup_interface(repl::LineEditREPL; hascolor = repl.hascolor, ex
                         )
 
     symata_prompt.on_done =
-        REPL.respond(Symata_parse_REPL_line,
+        symatarespond(Symata_parse_REPL_line,
                       repl, symata_prompt) # stay in symjulia
 
     if VERSION >= v"0.5"
