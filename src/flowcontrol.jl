@@ -375,7 +375,7 @@ end
             clear_throw()
             return length(res) == 0 ? Null : res[1]
         end
-        stwarn("Catch: throw set but expr is $res")
+        stwarn("Catch: throw set but expr is ", res)
         return res
     end
     return res
