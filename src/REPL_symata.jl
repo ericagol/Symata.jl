@@ -27,6 +27,10 @@ import Base.Multimedia: @try_display, xdisplayable, displays
 # NOTE: none of the code using symataprompt is used. The code that matters is set_symata_prompt
 const symataprompt = "symata > "
 
+##### New New output code
+
+symata_outstream(x) = SymmIO(outstream(x))
+
 ##### New output code
 
 immutable REPLDisplaySymata{R<:AbstractREPL} <: Display
@@ -36,7 +40,8 @@ end
 ==(a::REPLDisplaySymata, b::REPLDisplaySymata) = a.repl === b.repl
 
 function symata_display(d::REPLDisplaySymata, mime::MIME"text/plain", x)
-    io = outstream(d.repl)
+    io = symata_outstream(d.repl)
+    println("Trying 3")
     Base.have_color && write(io, answer_color(d.repl))
     stshow(IOContext(io, :limit => true), mime, x)
     println(io)
@@ -45,7 +50,7 @@ symata_display(d::REPLDisplaySymata, x) = symata_display(d, MIME("text/plain"), 
 
 function symata_print_response(repl::AbstractREPL, val::ANY, bt, show_value::Bool, have_color::Bool)
     repl.waserror = bt !== nothing
-    symata_print_response(outstream(repl), val, bt, show_value, have_color, REPL.specialdisplay(repl))
+    symata_print_response(symata_outstream(repl), val, bt, show_value, have_color, REPL.specialdisplay(repl))
 end
 
 stshow(args...) = show(args...)
@@ -59,14 +64,23 @@ function symata_display(args...)
 end
 symata_display(d::Display, mime::AbstractString, x) = symata_display(d, MIME(mime), x)
 symata_display(mime::AbstractString, x) = symata_display(MIME(mime), x)
+
 symata_display(d::TextDisplay, M::MIME"text/plain", x) = stshow(d.io, M, x)
+
 symata_display(d::TextDisplay, x) = symata_display(d, MIME"text/plain"(), x)
 
 function symata_display(d::REPLDisplay, mime::MIME"text/plain", x)
-    io = outstream(d.repl)
+    io = symata_outstream(d.repl)
+    println("Trying 2")
     Base.have_color && write(io, answer_color(d.repl))
-    stshow(IOContext(io, :limit => true), mime, x)    
-    println(io)
+    println("Trying 4 aaa")    
+#    stshow(IOContext(io.io, :limit => true), mime, x)
+#    show(IOContext(io, :limit => true), mime, x)
+    #    show(io, mime, x)
+    println(io, "doing show 5")    
+    show(io, x)
+    println(io)    
+    println(io, "did show 5")        
 end
 
 symata_display(d::REPLDisplay, x) = symata_display(d, MIME("text/plain"), x)
@@ -105,7 +119,7 @@ function symata_print_response(errio::IO, val::ANY, bt, show_value::Bool, have_c
                             symata_display(specialdisplay,val)
                         end
                     catch err
-                        println(errio, "Error showing value of type ", typeof(val), ":")
+                        println(errio, "symata_print_repsonse: Error showing value of type ", typeof(val), ":")
                         rethrow(err)
                     end
                 end

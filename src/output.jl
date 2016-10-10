@@ -95,6 +95,7 @@ end
 
 # No longer overwrite Base definition
 function stshow(io::IO, x::Rational)
+    println("in stshow")
     stshow(io, num(x))
     print(io, "/")
     stshow(io, den(x))
