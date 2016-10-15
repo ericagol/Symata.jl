@@ -43,6 +43,7 @@ function init_isymata()
         return
     end
     isymata_inited(true)
+    setkerneloptions(:output_style, :IJulia) # this is only set when initing. The user can change it
     nothing
 end
 
@@ -53,7 +54,7 @@ end
 function _init_isymata_v1_3_2()
     eval( Main.IJulia, quote
 
-import Symata: latex_display, wrapout, symata_completions, populate_builtins, retrieve_doc, isymata_mode
+import Symata: latex_display, wrapout, symata_completions, populate_builtins, retrieve_doc, isymata_mode, using_ijulia_output
           
 populate_builtins()
 
@@ -212,7 +213,7 @@ function symata_execute_request(socket, msg)
                          msg_pub(msg, "execute_result",
                                  Dict("execution_count" => n,
                                       "metadata" => result_metadata,
-                                      "data" => display_dict(isymata_mode() ? latex_display(wrapout(result)) : result))))
+                                      "data" => display_dict(isymata_mode() ? using_ijulia_output() ? latex_display(wrapout(result)) : wrapout(result) : result))))
 #                                      "data" => display_dict(insymata ? Main.wrapout(result) : result))))
 
         end
