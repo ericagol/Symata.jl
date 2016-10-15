@@ -81,6 +81,7 @@ const LLISTR = " \\right] "
 Ilatexstring() = "\\mathbb{i}"
 Infinitylatexstring() = "\\infty"
 
+# These are translations of the printed symbols to latex.
 const symbol_to_latex_table = Dict(
                                    :(=>) => " \\Rightarrow ",
                                    :(->) => " \\rightarrow ",
@@ -89,7 +90,11 @@ const symbol_to_latex_table = Dict(
                                    :(<=) => " \\le ",
                                    :(!=) => " \\ne ",
                                    :(&&) => " \\, \\text{&&} \\, ",
-                                   :(||) => " \\, \\text{||} \\, "
+:(||) => " \\, \\text{||} \\, ",
+:Pi => " \\pi ",
+:E => " \\mathbb{e} ",
+:Gamma => " \\Gamma ",
+:EulerGamma => " \\gamma "
                                    )
 
 
@@ -136,7 +141,7 @@ end
 
 function latex_string_prefix_function(mx::Mxpr)
     buf = IOBuffer()
-    print(buf, is_Mxpr(mx,:List) ? ""  : latex_string_mathop(outsym(mhead(mx))) * " \\! ")  # ipython inserts a space that we don't want
+    print(buf, is_Mxpr(mx,:List) ? ""  : latex_string(mhead(mx)) * " \\! ")  # ipython inserts a space that we don't want
     args = margs(mx)
     print(buf, latex_string(mhead(mx) == getsym(:List) ? LISTL : LFUNCL))
     wantparens = mhead(mx) == :List ? false : true
@@ -425,3 +430,29 @@ end
 # For Holdform, arguments are not evaluated, as in Hold.
 # But, in addition, Holdform is not printed.
 latex_string(mx::Mxpr{:HoldForm}) = latex_string(mx[1])
+
+
+function integral_limits_string(varrange)
+    if length(varrange) == 3
+        return "\\int_{" * latex_string(varrange[2]) * "}^{" * latex_string(varrange[3]) * "}"
+    else
+        return "\\int "
+    end    
+end
+
+function infinitessimal_string(varrange)
+    return " \\mathbb{d}" * latex_string(varrange[1])
+end
+
+function latex_string(mx::Mxpr{:Integrate})
+    buf = IOBuffer()
+    if length(mx) == 2  # single integration
+        integrand = mx[1]
+        varrange = mx[2]
+        print(buf, integral_limits_string(varrange))
+        print(buf, latex_string(integrand) * " \\, " * infinitessimal_string(varrange))
+        return takebuf_string(buf)
+    else
+        return string(mx)
+    end
+end
