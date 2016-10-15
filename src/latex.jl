@@ -1,19 +1,7 @@
 # Is import file-scoped ? If not, we need to do something else
 import Symata.SymataIO: WORational, WOComplexRational, Istring, outsym, FUNCR, FUNCL, LISTR, LISTL, needsparen
-import Symata.SymataIO: WOComplexReal, WOComplexInteger
+import Symata.SymataIO: WOComplexReal, WOComplexInteger, WOSymbol, WOBool
 
-const llparen = "\\left("
-const lrparen = "\\right)"
-
-const LFUNCL = "\\left("
-const LFUNCR = "\\right)"
-const LLISTL = '['
-const LLISTR = ']'
-
-
-Ilatexstring() = "\\mathbb{i}"
-
-#  display("text/latex", L"$$\int_0 \text{cos}(x)^2  b \ y \ r$$")
 
 #######################################################################
 
@@ -82,10 +70,35 @@ end
 
 #######################################################################
 
+const llparen = "\\left("
+const lrparen = "\\right)"
+
+const LFUNCL = "\\left("
+const LFUNCR = "\\right)"
+const LLISTL = '['
+const LLISTR = ']'
+
+
+Ilatexstring() = "\\mathbb{i}"
+Infinitylatexstring() = "\\infty"
+
+const symbol_to_latex_table = Dict(
+                                   :(=>) => " \\Rightarrow ",
+                                   :(->) => " \\rightarrow ",
+                                   Symbol("^:=") => " \\text{^:=} "
+                                   )
+
+
+function latex_symbol(s::Symbol)
+    haskey(symbol_to_latex_table, s) ? symbol_to_latex_table[s] : latex_string(s)
+end
+
 function latex_display(x)
-#    LaTeXStrings.LaTeXString("\$\$ " * latex_string(x) *  " \$\$")
     MyLaTeXString("\$\$ " * latex_string(x) *  " \$\$")
 end
+
+# show will print this correctly
+latex_display(mx::Mxpr{:FullForm}) = mx
 
 latex_string(x) = string(x)
 
@@ -98,18 +111,23 @@ function latex_string(s::Mxpr)
     latex_string_prefix_function(s)
 end
 
+# This will not be called if FullForm is the toplevel expression.
+# Here, FullForm will be converted to a string, as in Plain style and then wrapped in math mode text macro.
+latex_string(mx::Mxpr{:FullForm}) = latex_text(mx)
+
 latex_string_binary(s) = s
 latex_string_infix(s) = s
+
+latex_text(s) =  "\\text{" * string(s)  * "}"
 
 function latex_string_mathop(ins)
     s = string(ins)
     isempty(s) && return ""
     islower(s[1]) && return s  # if Heasd begins lower case print in math italic, e.g. f(x)
-    "\\text{" * s  * "}"       # if upper case print, like mathops. e.g. Table(...)
+    latex_text(s)
 end
 
 function latex_string_prefix_function(mx::Mxpr)
-#    s = is_Mxpr(mx,:List) ? ""  : latex_string(outsym(mhead(mx)))
     s = is_Mxpr(mx,:List) ? ""  : latex_string_mathop(outsym(mhead(mx))) * " \\! "  # ipython inserts a space that we don't want
     args = margs(mx)
     s *= latex_string(mhead(mx) == getsym(:List) ? LISTL : LFUNCL)
@@ -145,7 +163,6 @@ function latex_string(mx::Mxpr{:Plus})
     end
     s
 end
-
 
 latex_string(mx::Mxpr{:Power}) =  latex_string(base(mx)) * "^{" * latex_string(exponent(mx)) * "}"
 
@@ -248,6 +265,70 @@ function latex_string(x::WOComplexInteger)
             s *= latex_string(iz)
         end
         s *= Ilatexstring()
+    end
+    s
+end
+
+function  latex_string(mx::Mxpr{:DirectedInfinity})
+    if length(mx) == 0
+        latex_string_mathop(:ComplexInfinity)
+    elseif mx[1] == 1
+        Infinitylatexstring()
+    elseif mx[1] == -1
+        "-" * Infinitylatexstring()
+    else
+        latex_string_mathop(:DirectedInfinity) * LFUNCL * latex_string(mx[1]) * LFUNCR
+    end
+end
+
+function latex_string(mx::Mxpr{:Subscript})
+    latex_string(mx[1]) * "_{" *
+    join([latex_string(mx[i]) for i in 2:length(mx)], ",") *
+    "}"
+end
+
+latex_string(s::SSJSym) = latex_string(symname(s))
+
+function latex_string(s::WOSymbol)
+    latex_string_mathop(mtojsym(s.x))
+end
+
+function latex_string(s::Symbol)
+    latex_string_mathop(mtojsym(s))
+end
+
+function latex_string(v::WOBool)
+    v.x ? latex_text(:True) : latex_text(:False)
+end
+
+function latex_string(t::DataType)
+    latex_text(t)
+end
+
+function latex_string(mx::Mxpr{:Comparison})
+    join([latex_string(outsym(x)) for x in margs(mx)], " \\, " )
+end
+
+function latex_string_binary(mx::Mxpr)
+    if length(mx) != 2
+        return latex_string_prefix_function(mx)
+    else
+        s = ""
+        opstr = outsym(mhead(mx))
+        lop = mx[1]
+        if needsparen(lop)
+            s *= "(" * latex_string(lop) * ")"
+        else
+            s *= latex_string(lop)
+        end
+        s *= latex_symbol(opstr)
+#        print(io, binaryopspc(opstr), opstr , binaryopspc(opstr))
+        rop = mx[2]
+        if  needsparen(rop)
+            s *= "(" * latex_string(rop) * ")"
+        else
+            s *= latex_string(rop)
+        end
     end
     s
 end
