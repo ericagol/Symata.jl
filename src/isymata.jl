@@ -19,6 +19,13 @@ function isymata()
     nothing
 end
 
+# macro usepackage(package)
+#     quote
+#         try using 
+
+#     end
+# end
+
 """
     init_isymata()
 
@@ -38,6 +45,11 @@ function init_isymata()
     else
         warn("IJulia not loaded. Try 'using IJulia'. Try 'Pkg.add(\"IJulia\") if IJulia is not installed.")
     end
+    # try
+    #     using LaTeXStrings
+    # catch
+    #     warn("Can't load LaTeXStrings. Try 'Pkg.add(\"LaTeXStrings\") if LaTeXStrings is not installed.")
+    # end
     nothing
 end
 
@@ -202,7 +214,8 @@ function symata_execute_request(socket, msg)
                          msg_pub(msg, "execute_result",
                                  Dict("execution_count" => n,
                                       "metadata" => result_metadata,
-                                      "data" => display_dict(insymata ? Main.wrapout(result) : result))))
+                                      "data" => display_dict(insymata ? Main.latex_display(Main.wrapout(result)) : result))))                                      
+#                                      "data" => display_dict(insymata ? Main.wrapout(result) : result))))
 
         end
         send_ipython(requests[],
