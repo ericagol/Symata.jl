@@ -85,7 +85,12 @@ Infinitylatexstring() = "\\infty"
 const symbol_to_latex_table = Dict(
                                    :(=>) => " \\Rightarrow ",
                                    :(->) => " \\rightarrow ",
-                                   Symbol("^:=") => " \\text{^:=} "
+                                   Symbol("^:=") => " \\text{^:=} ",
+                                   :(>=) => " \\ge ",
+                                   :(<=) => " \\le ",
+                                   :(!=) => " \\ne ",
+                                   :(&&) => " \\, \\text{&&} \\, ",
+                                   :(||) => " \\, \\text{||} \\, "
                                    )
 
 
@@ -115,8 +120,8 @@ end
 # Here, FullForm will be converted to a string, as in Plain style and then wrapped in math mode text macro.
 latex_string(mx::Mxpr{:FullForm}) = latex_text(mx)
 
-latex_string_binary(s) = s
-latex_string_infix(s) = s
+#latex_string_binary(s) = s
+#latex_string_infix(s) = s
 
 latex_text(s) =  "\\text{" * string(s)  * "}"
 
@@ -205,7 +210,7 @@ function get_nums_dens(other, negpows, rationals)
 end
 
 function latex_string_factors(facs)
-    join([latex_string(x) for x in facs], " \\ ")
+    join([ x == -1 ? :(-) : latex_string(x) for x in facs], " \\ ")
 end
 
 # LaTeX does not put spaces between factors. But, Symata has multicharacter symbols, so we need spaces to distinguish them
@@ -290,11 +295,13 @@ end
 latex_string(s::SSJSym) = latex_string(symname(s))
 
 function latex_string(s::WOSymbol)
-    latex_string_mathop(mtojsym(s.x))
+    latex_string(s.x)
 end
 
 function latex_string(s::Symbol)
-    latex_string_mathop(mtojsym(s))
+    ms = mtojsym(s)
+    haskey(symbol_to_latex_table, ms) ? symbol_to_latex_table[ms] : latex_string_mathop(ms)
+#    latex_string_mathop(mtojsym(s))
 end
 
 function latex_string(v::WOBool)
@@ -328,6 +335,55 @@ function latex_string_binary(mx::Mxpr)
             s *= "(" * latex_string(rop) * ")"
         else
             s *= latex_string(rop)
+        end
+    end
+    s
+end
+
+
+# Times is handled above.
+latex_string_infix(s) = s
+function latex_string_infix(mx::Mxpr)
+    args = margs(mx)
+    np = false
+    sepsym = mtojsym(mhead(mx))
+    startind = 1
+    # if is_Mxpr(mx,:Times) && length(args) > 0
+    #     if args[1] == -1
+    #         print(io, "-")
+    #         startind = 2
+    #     elseif typeof(args[1]) <:Union{AbstractFloat,Integer}
+    #         print(io,args[1])
+    #         startind = 2
+    #     end
+    # end
+    s = ""
+    for i in startind:length(args)-1
+        arg = args[i]
+        if needsparen(arg)
+            np = true
+            s *= "("
+        else
+            np = false
+        end
+        s *= latex_string(arg)
+        if np
+            s *= ")"            
+        end
+#        spc = opspc(sepsym)
+        s *= latex_string(sepsym)
+#        print(io, spc, sepsym, spc)  TODO: fix spaces
+    end
+    if ! isempty(args)
+        if needsparen(args[end])
+            np = true
+            s *= "("            
+        else
+            np = false
+        end
+        s *= latex_string(args[end])
+        if np
+            s *= ")"            
         end
     end
     s
