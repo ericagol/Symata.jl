@@ -375,7 +375,7 @@ function show_infix(io::IO, mx::Mxpr)
     args = margs(mx)
     np = false
     sepsym = mtojsym(mhead(mx))
-    # uncomment following to print space for multiplication. But, I want "InputForm" for now,
+    # uncomment following to print space for multiplication rather than *. But, I want "InputForm" for now,
     # so we can copy output to input.
 #    if mhead(mx) == :Times sepsym = " " end # not a sym. Maybe we should make them all strings
     startind = 1

@@ -1,5 +1,6 @@
 # Is import file-scoped ? If not, we need to do something else
 import Symata.SymataIO: WORational, WOComplexRational, Istring, outsym, FUNCR, FUNCL, LISTR, LISTL, needsparen
+import Symata.SymataIO: WOComplexReal, WOComplexInteger
 
 const llparen = "\\left("
 const lrparen = "\\right)"
@@ -220,6 +221,33 @@ function latex_string(x::WOComplexRational)
         s *= Ilatexstring()
     else
         s *=   latex_string(imag(z)) *  " \\ " * Ilatexstring()
+    end
+    s
+end
+
+# We display real part if it is 0.0
+function latex_string(x::WOComplexReal)
+    z = x.x
+    latex_string(real(z)) * " + " * latex_string(imag(z)) * Ilatexstring()
+end
+
+# Do not display real part if it is 0
+function latex_string(x::WOComplexInteger)
+    z = x.x
+    s = ""
+    if real(z) != 0
+        s *= latex_string(real(z)) * " + "
+    end
+    if imag(z) == 1
+        s *= Ilatexstring()
+    else
+        iz = imag(z)
+        if iz == -1
+            s *= "-"
+        else
+            s *= latex_string(iz)
+        end
+        s *= Ilatexstring()
     end
     s
 end
