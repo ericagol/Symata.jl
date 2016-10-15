@@ -2,10 +2,9 @@
 import Symata.SymataIO: WORational, WOComplexRational, Istring, outsym, FUNCR, FUNCL, LISTR, LISTL, needsparen
 import Symata.SymataIO: WOComplexReal, WOComplexInteger, WOSymbol, WOBool
 
-
 #######################################################################
 
-# Following copied from LaTeXString. We surely need almost none of this.
+# Following copied from LaTeXString by Steven G Johnson. We surely need almost none of this.
 # But, there is something magic here that makes IJulia render the strings
 # as LaTeX. I don't yet know where it is.
 
@@ -70,13 +69,13 @@ end
 
 #######################################################################
 
-const llparen = "\\left("
-const lrparen = "\\right)"
+const llparen = " \\left( "
+const lrparen = " \\right) "
 
-const LFUNCL = "\\left("
-const LFUNCR = "\\right)"
-const LLISTL = '['
-const LLISTR = ']'
+const LFUNCL = " \\left( "
+const LFUNCR = " \\right) "
+const LLISTL = " \\left[ "
+const LLISTR = " \\right] "
 
 
 Ilatexstring() = "\\mathbb{i}"
@@ -105,6 +104,9 @@ end
 # show will print this correctly
 latex_display(mx::Mxpr{:FullForm}) = mx
 
+# TODO: below we should use takebuf_string(buf) for efficiency rather
+# than s *= "new text". Currently, this is done only in latex_string_prefix_function()
+
 latex_string(x) = string(x)
 
 function latex_string(s::Mxpr)
@@ -128,28 +130,29 @@ latex_text(s) =  "\\text{" * string(s)  * "}"
 function latex_string_mathop(ins)
     s = string(ins)
     isempty(s) && return ""
-    islower(s[1]) && return s  # if Heasd begins lower case print in math italic, e.g. f(x)
+    islower(s[1]) && return s  # if Head begins lower case print in math italic, e.g. f(x)
     latex_text(s)
 end
 
 function latex_string_prefix_function(mx::Mxpr)
-    s = is_Mxpr(mx,:List) ? ""  : latex_string_mathop(outsym(mhead(mx))) * " \\! "  # ipython inserts a space that we don't want
+    buf = IOBuffer()
+    print(buf, is_Mxpr(mx,:List) ? ""  : latex_string_mathop(outsym(mhead(mx))) * " \\! ")  # ipython inserts a space that we don't want
     args = margs(mx)
-    s *= latex_string(mhead(mx) == getsym(:List) ? LISTL : LFUNCL)
+    print(buf, latex_string(mhead(mx) == getsym(:List) ? LISTL : LFUNCL))
     wantparens = mhead(mx) == :List ? false : true
     for i in 1:length(args)-1
         if needsparen(args[i]) && wantparens
-            s *= llparen
+           print(buf, llparen)
         end
-        s *= latex_string(args[i])
+        print(buf, latex_string(args[i]))
         if needsparen(args[i]) && wantparens
-            s *= lrparen
+            print(buf, lrparen)
         end
-        s *=  ","
+        print(buf, ",")
     end
-    if  ! isempty(args) s *= latex_string(args[end]) end
-    s *= latex_string(mx.head == getsym(:List) ? LISTR : LFUNCR)
-    s
+    if  ! isempty(args) print(buf, latex_string(args[end])) end
+    print(buf, latex_string(mx.head == getsym(:List) ? LISTR : LFUNCR))
+    takebuf_string(buf)
 end
 
 
@@ -324,15 +327,14 @@ function latex_string_binary(mx::Mxpr)
         opstr = outsym(mhead(mx))
         lop = mx[1]
         if needsparen(lop)
-            s *= "(" * latex_string(lop) * ")"
+            s *= llparen * latex_string(lop) * lrparen
         else
             s *= latex_string(lop)
         end
         s *= latex_symbol(opstr)
-#        print(io, binaryopspc(opstr), opstr , binaryopspc(opstr))
         rop = mx[2]
         if  needsparen(rop)
-            s *= "(" * latex_string(rop) * ")"
+            s *= llparen * latex_string(rop) * lrparen
         else
             s *= latex_string(rop)
         end
@@ -341,50 +343,85 @@ function latex_string_binary(mx::Mxpr)
 end
 
 
-# Times is handled above.
+# Times is handled above. This needs to be cleaned up.
 latex_string_infix(s) = s
 function latex_string_infix(mx::Mxpr)
     args = margs(mx)
     np = false
     sepsym = mtojsym(mhead(mx))
-    startind = 1
-    # if is_Mxpr(mx,:Times) && length(args) > 0
-    #     if args[1] == -1
-    #         print(io, "-")
-    #         startind = 2
-    #     elseif typeof(args[1]) <:Union{AbstractFloat,Integer}
-    #         print(io,args[1])
-    #         startind = 2
-    #     end
-    # end
     s = ""
-    for i in startind:length(args)-1
+    for i in 1:length(args)-1
         arg = args[i]
         if needsparen(arg)
             np = true
-            s *= "("
+            s *= llparen
         else
             np = false
         end
         s *= latex_string(arg)
         if np
-            s *= ")"            
+            s *= lrparen
         end
-#        spc = opspc(sepsym)
         s *= latex_string(sepsym)
-#        print(io, spc, sepsym, spc)  TODO: fix spaces
     end
     if ! isempty(args)
         if needsparen(args[end])
             np = true
-            s *= "("            
+            s *= llparen
         else
             np = false
         end
         s *= latex_string(args[end])
         if np
-            s *= ")"            
+            s *= lrparen
         end
     end
     s
 end
+
+
+function latex_string(mx::Mxpr{:Blank})
+    s = latex_text("_")
+    if length(mx) > 0
+        s *= latex_string(mx[1])
+    end
+    s
+end
+
+function latex_string(mx::Mxpr{:BlankSequence})
+    s = latex_text("__")
+    if length(mx) > 0
+        s *= latex_string(mx[1])
+    end
+    s
+end
+
+function latex_string(mx::Mxpr{:BlankNullSequence})
+    s = latex_text("___")    
+    if length(mx) > 0
+        s *= latex_string(mx[1])
+    end
+    s
+end
+
+function latex_string(mx::Mxpr{:Pattern})
+    s = latex_string(mx[1])
+    if is_Mxpr(mx[2],:Blank)
+        s *= latex_string(mx[2])
+    else
+        s *= " \\text{::}(" * latex_string(mx[2]) * ")"
+    end
+    s
+end
+
+function latex_string(qs::Qsym)
+    s = ""
+    if qs.context != CurrentContext.name
+        s *= latex_string(qs.context) * "."
+    end
+    s *= latex_string(qs.name)
+end
+
+# For Holdform, arguments are not evaluated, as in Hold.
+# But, in addition, Holdform is not printed.
+latex_string(mx::Mxpr{:HoldForm}) = latex_string(mx[1])
