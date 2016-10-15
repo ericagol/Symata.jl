@@ -8,7 +8,7 @@ import Compat.String
 import Base: /, *, +, -, ^, setindex!, getindex, replace
 export @ex, @testex, symval, symname, @aex, meval, doeval, infseval
 
-# For IJulia
+# For IJulia. We could probably import insymata in the interface code instead.
 export isymata, insymata
 
 # For development

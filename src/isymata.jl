@@ -6,12 +6,14 @@ From within Symata, `Julia()` exits Symata
 and returns to Julia mode.
 """
 function isymata()
-    if isymata_inited
-        eval(Main, :(insymata = true))
+    if isymata_inited()
+        isymata_mode(true)
+#        eval(Main, :(insymata = true))
     else
         init_isymata()
-        if isymata_inited
-            eval(Main, :(insymata = true))
+        if isymata_inited()
+            isymata_mode(true)
+#            eval(Main, :(insymata = true))
         else
             error("Unable to initialize isymata in IJulia")
         end
@@ -40,7 +42,7 @@ function init_isymata()
         warn("IJulia not loaded. Try 'using IJulia'. Try 'Pkg.add(\"IJulia\") if IJulia is not installed.")
         return
     end
-    global isymata_inited = true
+    isymata_inited(true)
     nothing
 end
 
@@ -51,7 +53,7 @@ end
 function _init_isymata_v1_3_2()
     eval( Main.IJulia, quote
 
-import Symata: latex_display, wrapout, symata_completions, populate_builtins, retrieve_doc
+import Symata: latex_display, wrapout, symata_completions, populate_builtins, retrieve_doc, isymata_mode
           
 populate_builtins()
 
@@ -69,10 +71,12 @@ function symata_complete_request(socket, msg)
     end
 
     codestart = find_parsestart(code, cursorpos)
-    insymata = (isdefined(Main, :insymata) && insymata)
+#    insymata = (isdefined(Main, :insymata) && insymata)
+
     local comps
     local positions
-    if insymata
+#    if insymata
+    if isymata_mode()
         comps, positions = symata_completions(code[codestart:end], cursorpos-codestart+1)
     else
         comps, positions = Base.REPLCompletions.completions(code[codestart:end], cursorpos-codestart+1)
@@ -101,9 +105,10 @@ function symata_inspect_request(socket, msg)
             content = Dict("status" => "ok", "found" => false)
         else
 
-            insymata = (isdefined(Main, :insymata) && Main.insymata)
+#            insymata = (isdefined(Main, :insymata) && Main.insymata)
             local d
-            if insymata
+#            if insymata
+            if isymata_mode()                
                 d = display_dict(retrieve_doc(s))
             else
                 d = docdict(s)
@@ -143,7 +148,7 @@ function symata_execute_request(socket, msg)
         In[n] = code
     end
 
-    insymata = (isdefined(Main, :insymata) && Main.insymata)
+#    insymata = (isdefined(Main, :insymata) && Main.insymata)
 
     # "; ..." cells are interpreted as shell commands for run
     code = replace(code, r"^\s*;.*$",
@@ -153,7 +158,7 @@ function symata_execute_request(socket, msg)
     # a cell beginning with "? ..." is interpreted as a help request
     hcode = replace(code, r"^\s*\?", "")
     if hcode != code
-        if insymata
+        if isymata_mode()
             code = "Help(" * strip(code)[2:end] * ")"
             println(code)
         else
@@ -162,7 +167,7 @@ function symata_execute_request(socket, msg)
     end
 
 
-    if insymata
+    if isymata_mode()
         code = "@Symata.ex " * code
     end
 
@@ -207,7 +212,7 @@ function symata_execute_request(socket, msg)
                          msg_pub(msg, "execute_result",
                                  Dict("execution_count" => n,
                                       "metadata" => result_metadata,
-                                      "data" => display_dict(insymata ? latex_display(wrapout(result)) : result))))
+                                      "data" => display_dict(isymata_mode() ? latex_display(wrapout(result)) : result))))
 #                                      "data" => display_dict(insymata ? Main.wrapout(result) : result))))
 
         end
@@ -247,7 +252,7 @@ end
 
 #### For use with IJulia master 8abf276  Tue Oct 11 18:43:25 2016 +0100
 
-# FIXME: import symbols as in version above
+# FIXME: import symbols as in version above, other bitrot
 function _init_isymata()
  eval( Main.IJulia, quote
 function symata_execute_request(socket, msg)

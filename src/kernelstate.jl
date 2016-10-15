@@ -226,15 +226,18 @@ set_throw() = FLOWFLAGS.throwflag = true
 ##### User options and info
 
 const Kerneloptions = Dict{Any,Any}(
-                                    :unicode_output => false,
-                                    :show_sympy_docs => true,
-                                    :return_sympy => false,
-                                    :sympy_error => nothing,
-                                    :compact_output => true,
-                                    :history_length => 100,
-                                    :bigint_input => false,
-                                    :bigfloat_input => false
-                                  )
+    :unicode_output => false,
+    :ijulia_latex_output => false,                                    
+    :show_sympy_docs => true,
+    :return_sympy => false,
+    :sympy_error => nothing,
+    :compact_output => true,
+    :history_length => 100,
+    :bigint_input => false,
+    :bigfloat_input => false,
+    :isymata_inited => false,
+    :isymata_mode => false
+)
 
 function getkerneloptions(sym::Symbol)
     Kerneloptions[sym]
@@ -365,10 +368,22 @@ end
 #### isymata_inited
 
 """
-    isymata_inited
+    isymata_inited()
+    isymata_inited(v::Bool)
 
 true if IJulia has been configured to run Symata during this
 session. This configuration is done by `init_isymata` the first time `isymata()`
 is called during a session.
 """
-global isymata_inited = false
+isymata_inited() = getkerneloptions(:isymata_inited)
+isymata_inited(v::Bool) = (ov = getkerneloptions(:isymata_inited); setkerneloptions(:isymata_inited,v); ov)
+
+
+"""
+    isymata_mode()
+    isymata_mode(v::Bool)
+
+get or set the flag signifying that IJulia input should be interpreted as Symata rather than Julia.
+"""
+isymata_mode() = getkerneloptions(:isymata_mode)
+isymata_mode(v::Bool) = (ov = getkerneloptions(:isymata_mode); setkerneloptions(:isymata_mode,v); ov)
