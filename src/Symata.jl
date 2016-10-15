@@ -8,8 +8,8 @@ import Compat.String
 import Base: /, *, +, -, ^, setindex!, getindex, replace
 export @ex, @testex, symval, symname, @aex, meval, doeval, infseval
 
-# For IJulia. FIXME. We need a better way to access these symbols
-export wrapout, isymata, symata_completions, populate_builtins, retrieve_doc, latex_display
+# For IJulia
+export isymata, insymata
 
 # For development
 export sympy, pytypeof, mxpr, canonexpr!
