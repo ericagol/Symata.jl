@@ -402,7 +402,7 @@ function latex_string(mx::Mxpr{:BlankSequence})
 end
 
 function latex_string(mx::Mxpr{:BlankNullSequence})
-    s = latex_text("___")    
+    s = latex_text("___")
     if length(mx) > 0
         s *= latex_string(mx[1])
     end
@@ -437,7 +437,7 @@ function integral_limits_string(varrange)
         return "\\int_{" * latex_string(varrange[2]) * "}^{" * latex_string(varrange[3]) * "}"
     else
         return "\\int "
-    end    
+    end
 end
 
 function infinitessimal_string(varrange)
@@ -446,13 +446,50 @@ end
 
 function latex_string(mx::Mxpr{:Integrate})
     buf = IOBuffer()
+    integrand = latex_string(mx[1])
     if length(mx) == 2  # single integration
-        integrand = mx[1]
         varrange = mx[2]
         print(buf, integral_limits_string(varrange))
-        print(buf, latex_string(integrand) * " \\, " * infinitessimal_string(varrange))
+        print(buf, integrand * " \\, " * infinitessimal_string(varrange))
+    else
+        for i in 2:length(mx)
+            varrange = mx[i]
+            print(buf, integral_limits_string(varrange))
+            print(buf, " " * infinitessimal_string(varrange))
+        end
+        print(buf, " \\, " * integrand)
+    end
+    return takebuf_string(buf)
+end
+
+function sum_limits_string(varrange)
+    if length(varrange) == 3
+        return "\\sum_{" * latex_string(varrange[1]) * "=" * latex_string(varrange[2]) * "}^{" * latex_string(varrange[3]) * "}"
+    else
+        return "\\sum " # This probably should not happen
+    end
+end
+
+function latex_string(mx::Mxpr{:Sum})
+    buf = IOBuffer()
+    summand = latex_string(mx[1])
+    if length(mx) == 2  # single summation
+        varrange = mx[2]
+        print(buf, sum_limits_string(varrange))
+        print(buf, summand)
         return takebuf_string(buf)
     else
-        return string(mx)
+        args = margs(mx)
+        sargs = args[2:end]
+        print(buf, " \\sum ")
+        print(buf, "_{\\substack{" * join([ latex_string(v[1]) * "=" * latex_string(v[2]) for v in sargs], " \\\\ ") * "}}")
+        ul = sargs[1][3]
+        if all( x -> x[3] == ul , sargs)
+            print(buf, "^{" * latex_string(sargs[1][3]) * "}")   # only display one upper limit if they are all the same
+        else
+            print(buf, "^{" * join([latex_string(v[3]) for v in sargs], ",") * "}")
+        end
+        print(buf, summand)
+        return takebuf_string(buf)
     end
 end
