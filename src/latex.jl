@@ -110,7 +110,7 @@ end
 latex_display(mx::Mxpr{:FullForm}) = mx
 
 # TODO: below we should use takebuf_string(buf) for efficiency rather
-# than s *= "new text". Currently, this is done only in latex_string_prefix_function()
+# than s *= "new text". Some functions below already use takebuf_string
 
 latex_string(x) = string(x)
 
