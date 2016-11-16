@@ -3,7 +3,7 @@ ClearAll(f, y0, a, l, x)
 y0(x_) := (e*x)*(l^3 - 2*l*x^2 + x^3)
 
   # Stodola-Vianello method
-f(maxiters_, y0_) := Module([i, yder, res=Table(Table( 0.0 , [i,6]), [j,maxiters])],
+f(maxiters_, y0_) := Module([i, yder, res=ConstantArray(0.0,[maxiters,6])],
        (
         # Initialize the first row of the res matrix
       res[1,2] = y0(x),
@@ -17,7 +17,7 @@ f(maxiters_, y0_) := Module([i, yder, res=Table(Table( 0.0 , [i,6]), [j,maxiters
       # Start the loop to improve accuracy stored in subsequent rows,
       # res[i, 1] contains the Euler ratio.
       For(i=2, i<=maxiters, Increment(i),
-        [
+        begin
           res[i, 6] = Simplify(w/(EI)*((x-l)*res[i-1,4] + res[i-1,3]))
           # Above the basic Euler equation for a pinned-pinned flagpole
           ClearAll(K1, K11, tmpy5, tmpy4, tmp)
@@ -34,8 +34,8 @@ f(maxiters_, y0_) := Module([i, yder, res=Table(Table( 0.0 , [i,6]), [j,maxiters
           res[i,2] = Simplify( tmpy2(x)  ./ (K1 => K11[1,1,2]))
           tmp = Simplify( (((l^3)*w)/EI)*(res[i-1,3]/res[i, 3]) )
           res[i,1] = N(Simplify( tmp ./ (x => l) ))
-          Println("N[res[",i,", 1]]: ", res[i,1])
-        ]
+          Println("N[res[$i, 1]]: ", res[i,1])
+        end
       ),
       Return(res)
     )

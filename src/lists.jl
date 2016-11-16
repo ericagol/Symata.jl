@@ -465,10 +465,6 @@ function _constantarray(expr::Mxpr,n::Integer)
     mxpr(:List,nargs)
 end
 
-# @doap function ConstantArray{T<:Union{Number,SJSym,String}}(expr::T,n::Integer)
-#     _constantarray(expr,n)
-# end
-
 @doap function ConstantArray(expr,ns::Mxpr{:List})
     _constantarray(expr,reverse(margs(ns)))
 end
@@ -483,17 +479,11 @@ end
 function _constantarray{T<:Union{Number,SJSym,String}}(expr::T,n::Integer)
     nargs = newargs(n)
     fill!(nargs,expr)
-    setfixed(mxpr(:List,nargs))    
+    a = mxpr(:List,nargs)
+    expr == :Nothing && return a
+    setfixed(a)
 end
 
-
-# @doap function ConstantArray(expr::AbstractString,n)
-#     nargs = newargs(n)
-#     @inbounds for i in 1:n
-#         nargs[i] = sjcopy(expr)  ## 
-#     end
-#     setfixed(mxpr(:List,nargs))
-# end
 
 ### Nothing
 
