@@ -432,47 +432,68 @@ create a `List` of `n` copies of `expr`.
 """
 
 # We take only attribute to be Protected. So expr is evaled already
-function apprules(mx::Mxpr{:ConstantArray})
-    do_ConstantArray(mx,margs(mx)...)
-end
 
-do_ConstantArray(mx,args...) = mx
+@mkapprule ConstantArray
+
+# function apprules(mx::Mxpr{:ConstantArray})
+#     do_ConstantArray(mx,margs(mx)...)
+# end
+#do_ConstantArray(mx,args...) = mx
 
 # The annotation for Number is needed, because deepcopy tries
 # to do something very slow with numbers.
 # Copying a small Mxpr is extremely slow
 # 'c^2' is 200 times slower than Symbol 'c'.
-function do_ConstantArray(mx,expr,n)
+
+@doap function ConstantArray(expr,n::Integer)
+    _constantarray(expr,n)
+end
+
+function _constantarray(expr,n::Integer)
     nargs = newargs(n)
     @inbounds for i in 1:n
         nargs[i] = recursive_copy(expr)
     end
-    setfixed(mxpr(:List,nargs))
+    mxpr(:List,nargs)
 end
 
-function do_ConstantArray(mx,expr::Mxpr,n)
+function _constantarray(expr::Mxpr,n::Integer)
     nargs = newargs(n)
      @inbounds for i in 1:n
-        nargs[i] = setfixed(recursive_copy(expr))
-    end
-    setfixed(mxpr(:List,nargs))
+        nargs[i] = setfixed(recursive_copy(expr))         
+     end
+    mxpr(:List,nargs)
 end
 
-function do_ConstantArray{T<:Union{Number,SJSym}}(mx,expr::T,n)
-    nargs = newargs(n)
-    @inbounds for i in 1:n
-        nargs[i] = expr
-    end
-    setfixed(mxpr(:List,nargs))
+# @doap function ConstantArray{T<:Union{Number,SJSym,String}}(expr::T,n::Integer)
+#     _constantarray(expr,n)
+# end
+
+@doap function ConstantArray(expr,ns::Mxpr{:List})
+    _constantarray(expr,reverse(margs(ns)))
 end
 
-function do_ConstantArray(mx,expr::AbstractString,n)
-    nargs = newargs(n)
-    @inbounds for i in 1:n
-        nargs[i] = copy(expr)
-    end
-    setfixed(mxpr(:List,nargs))
+function _constantarray(expr,ns::Array)
+    length(ns) == 0 && return Null
+    a = _constantarray(expr,ns[1])
+    length(ns) == 1 && return a
+    _constantarray(a,ns[2:end])
 end
+
+function _constantarray{T<:Union{Number,SJSym,String}}(expr::T,n::Integer)
+    nargs = newargs(n)
+    fill!(nargs,expr)
+    setfixed(mxpr(:List,nargs))    
+end
+
+
+# @doap function ConstantArray(expr::AbstractString,n)
+#     nargs = newargs(n)
+#     @inbounds for i in 1:n
+#         nargs[i] = sjcopy(expr)  ## 
+#     end
+#     setfixed(mxpr(:List,nargs))
+# end
 
 ### Nothing
 

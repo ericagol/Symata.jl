@@ -183,6 +183,10 @@ T a[2] == 1 + d^3
 T a[1] == 1 + d^2
 T a[3] == 1 + d^2
 
+ConstantArray(0,[2,3,4]) == Array(x -> 0,[2,3,4])
+ConstantArray(c,[2,3,4]) == Array(x -> c,[2,3,4])
+ConstantArray(1+d^2,[2,3,4]) == Array(x -> 1+d^2,[2,3,4])
+
 ClearAll(a,d,i)
 
 ### Map
