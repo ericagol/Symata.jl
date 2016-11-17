@@ -195,20 +195,81 @@ function parse_quoted(ex::Expr,newa)
     return head
 end
 
+
+### NOT using this code now
+function parse_parameters(ex::Expr)
+    newa = newargs()
+    j = 0
+    for i in 1:length(ex.args)
+        testof(1)
+        j += 1
+        y = ex.args[i]
+        _parse_parameters(y,newa)
+        isa(y,Expr) && y.head == :parameters || break                
+    end
+    mxpr(:TestExpression,newa...)
+end
+
+function _parse_parameters(x,newa)
+    unshift!(newa,extomx(x))
+end
+
+function _parse_parameters(x::Expr,newa)
+    if x.head == :parameters
+        for y in x.args
+            if isa(y,Expr) && y.head == :parameters
+                _parse_parameters(y,newa)
+            else
+                unshift!(newa, extomx(y))
+            end
+        end
+    else
+        unshift!(newa,extomx(x))
+    end
+end
+
+function parseTestExpression(newa)
+    println(newa)
+    return newa    
+    te = newa[end]
+    if symlength(te) > 0 && isa(te[1],Mxpr{:TestExpression})
+        return newa
+    end
+    nna = newargs()
+    te = newa[end]
+    ind = 2
+    if symlength(te) > 0 && isa(te[1],Mxpr{:TestExpression})
+#        newa[1] = te[1]
+        push!(nna,mxpr(:TestExpression,margs(te)[2:end]...))
+#        push!(newa,mxpr(:TestExpression,margs(te)[2:end]...))
+        push!(nna,te[1])
+#        unshift!(newa,te[1])        
+        ind = 3
+    end
+    for i in 2:length(newa)
+#        unshift!(nna,newa[i])
+        push!(nna,newa[i])        
+    end
+    push!(nna,newa[1])
+    #    unshift!(nna,newa[1])
+    println("nna : $nna")
+    nna
+end
+
 ## Main translation routine
 # We use Julia for lexing/parsing. But we change the semantics:
 # sometimes a little, sometimes a lot.
 function extomx(ex::Expr)
     newa = newargs()
-    local head::Any
+    local nhead::Any
     ex = rewrite_expr(ex)
     isa(ex,Expr) || return ex  # may be a rational
     a = ex.args
     # We usually set the head and args in the conditional and construct Mxpr at the end
-    if ex.head == :call
-        head = extomx(a[1])
-        if head == :J
-            head = :Jxpr
+    if is_call(ex) # ex.head == :call
+        nhead = extomx(a[1])
+        if nhead == :J
+            nhead = :Jxpr
             push!(newa,ex.args[2]) # will be interpreted as Julia code, so don't translate it.
         else
             @inbounds for i in 2:length(a) push!(newa,extomx(a[i])) end
@@ -217,11 +278,11 @@ function extomx(ex::Expr)
         return extomx(a[2])
     elseif ex.head == :line return nothing # Ignore line number. part of misinterpretation of g(x_Integer) = "int".
     elseif haskey(JTOMSYM,ex.head)
-        head = JTOMSYM[ex.head]
-        check_autoload(head)
+        nhead = JTOMSYM[ex.head]
+        check_autoload(nhead)
         extomxarr!(a,newa)
     elseif ex.head == :kw  # Interpret keword as Set, but Expr is different than when ex.head == :(=)
-        head = :Set
+        nhead = :Set
         extomxarr!(a,newa)
     elseif ex.head == :(::)
         return parsepattern(ex)
@@ -241,7 +302,7 @@ function extomx(ex::Expr)
                 end
                 isa(pt,Symbol) || isa(pt,Function) || typeof(pt) <: Function ||
                         error("extomx: argument to PatternTest must be a Symbol or a Function")
-                head = :PatternTest
+                nhead = :PatternTest
                 push!(newa,extomx(a[1]),pt)
             else
                 lhs = extomx(a[1])
@@ -249,27 +310,40 @@ function extomx(ex::Expr)
                                                                    # Maybe : represents too many things.
                     return mxpr(:Optional,lhs,extomx(a[2]))
                 end
-                head = :Span      # Span syntax like:  a(::10), a(1::2), etc. clash with use of colon above
+                nhead = :Span      # Span syntax like:  a(::10), a(1::2), etc. clash with use of colon above
                 extomxarr!(a,newa) # We may have to change the syntax
             end
         else
-            head = :Span
+            nhead = :Span
             extomxarr!(a,newa)
         end
     elseif ex.head == :(.)  # don't need parens, but this is readable
         return parse_qualified_symbol(ex)
     elseif ex.head == :quote
-        head = parse_quoted(ex,newa)
+        nhead = parse_quoted(ex,newa)
     elseif ex.head == :macrocall
-        return eval(ex )
+        return eval(ex )  # is this exactly what we want ?
     elseif ex.head == :string
-        head = :StringInterpolation
+        nhead = :StringInterpolation
         extomxarr!(a,newa)
+    # elseif ex.head == :parameters  # we interpret as a compound expression
+    #     return parse_parameters(ex)
+#        head = parse_parameters(ex,newa)        
     else
         dump(ex)
         error("extomx: No translation for Expr head '$(ex.head)' in $ex")
     end
-    mx = mxpr(head,newa)  # Create the Mxpr
+    if length(newa) > 1 && isa(newa[1],Mxpr{:TestExpression})
+        newa = parseTestExpression(newa)
+    end
+    #     nna = newargs()
+    #     for i in 2:length(newa)
+    #         unshift!(nna,newa[i])
+    #     end
+    #     push!(nna,newa[1])
+    #     newa = nna
+    # end
+    mx = mxpr(nhead,newa)  # Create the Mxpr
 end
 
 is_call(ex::Expr) = ex.head == :call

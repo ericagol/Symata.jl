@@ -172,7 +172,7 @@ mtojsym(x) = x
 
 # A compound expression is denoted by tuple () or by begin end.
 # We could possible used tuple for something else.
-for (k,v) = ( (:tuple,:CompoundExpression), (:block,:CompoundExpression), (:dict, :List) )
+for (k,v) = ( (:tuple,:CompoundExpression), (:block,:CompoundExpression), (:dict, :List), (:parameters, :TestExpression) )
     JTOMSYM[k] = v
 end
 
