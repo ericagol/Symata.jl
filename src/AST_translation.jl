@@ -122,6 +122,8 @@ end
 # but an entire pattern expression. Mma does this with a colon.
 # f:(_^_), or f:_^_  --> Pattern[x, Power[Blank[], Blank[]]].
 # We are using colon for Span. I don't know what we can do.
+## Nov 2016. Moved away from :( ) for Julia expressions. Will remove it soon.
+## This frees :( ) and :s for other things
 # Mma does  Fullform[a::b] --> MessageName[a, "b"]. We could take
 # :: for Pattern
 function parseblank(s::AbstractString)

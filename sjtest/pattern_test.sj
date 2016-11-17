@@ -71,7 +71,7 @@ rotheadargs(f_(args__)) := (Last([args])(f,Splat(Most([args]))))
 T rotheadargs( a + b + c + d) == d(Plus,a,b,c)
 
 ## localize variable in heads in module
-rotheadargs1(f_(args__)) := Module([ls = [args]], (Null,(Last(ls)(f,Splat(Most(ls))))))
+rotheadargs1(f_(args__)) := Module([ls = [args]], Last(ls)(f,Splat(Most(ls))))
 T rotheadargs1( a + b + c + d) == d(Plus,a,b,c)
 
 ####
