@@ -225,7 +225,11 @@ function extomx(ex::Expr)
                 length(ptargs) != 2 && error("extomx: too many args to PatternTest")
                 pt = ptargs[2]
                 if isa(pt,Expr)  # assume it is a Function
-                    pt = eval(eval(pt)) # first eval gets Symbol from Expr, Second gives Function.
+                    if pt.head == :call && length(pt.args) > 1 && pt.args[1] == :J
+                        pt = eval(eval(pt.args[2]))
+                    else
+                        pt = eval(eval(pt)) # first eval gets Symbol from Expr, Second gives Function.
+                    end
                 end
                 isa(pt,Symbol) || isa(pt,Function) || typeof(pt) <: Function ||
                         error("extomx: argument to PatternTest must be a Symbol or a Function")
