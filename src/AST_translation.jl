@@ -195,65 +195,19 @@ function parse_quoted(ex::Expr,newa)
     return head
 end
 
-
-### NOT using this code now
-function parse_parameters(ex::Expr)
-    newa = newargs()
-    j = 0
-    for i in 1:length(ex.args)
-        testof(1)
-        j += 1
-        y = ex.args[i]
-        _parse_parameters(y,newa)
-        isa(y,Expr) && y.head == :parameters || break                
-    end
-    mxpr(:TestExpression,newa...)
-end
-
-function _parse_parameters(x,newa)
-    unshift!(newa,extomx(x))
-end
-
-function _parse_parameters(x::Expr,newa)
-    if x.head == :parameters
-        for y in x.args
-            if isa(y,Expr) && y.head == :parameters
-                _parse_parameters(y,newa)
-            else
-                unshift!(newa, extomx(y))
-            end
-        end
+## TODO: handle head :parameters here.
+## Check if the first argument (ex.args[2]) is a :parameters expression.
+## If so, rewrite ex. We probably want f(a,b;c,d;e,f) to be three compound expressions with two expressions each.
+function parse_call(ex,newa)
+    a = ex.args
+    nhead = extomx(ex.args[1])
+    if nhead == :J
+        nhead = :Jxpr
+        push!(newa,a[2]) # will be interpreted as Julia code, so don't translate it.
     else
-        unshift!(newa,extomx(x))
+        @inbounds for i in 2:length(a) push!(newa,extomx(a[i])) end
     end
-end
-
-function parseTestExpression(newa)
-    println(newa)
-    return newa    
-    te = newa[end]
-    if symlength(te) > 0 && isa(te[1],Mxpr{:TestExpression})
-        return newa
-    end
-    nna = newargs()
-    te = newa[end]
-    ind = 2
-    if symlength(te) > 0 && isa(te[1],Mxpr{:TestExpression})
-#        newa[1] = te[1]
-        push!(nna,mxpr(:TestExpression,margs(te)[2:end]...))
-#        push!(newa,mxpr(:TestExpression,margs(te)[2:end]...))
-        push!(nna,te[1])
-#        unshift!(newa,te[1])        
-        ind = 3
-    end
-    for i in 2:length(newa)
-#        unshift!(nna,newa[i])
-        push!(nna,newa[i])        
-    end
-    push!(nna,newa[1])
-    #    unshift!(nna,newa[1])
-    println("nna : $nna")
-    nna
+    mxpr(nhead,newa)
 end
 
 ## Main translation routine
@@ -267,14 +221,7 @@ function extomx(ex::Expr)
     ohead = ex.head
     a = ex.args
     # We usually set the head and args in the conditional and construct Mxpr at the end
-    if is_call(ex) # ex.head == :call
-        nhead = extomx(a[1])
-        if nhead == :J
-            nhead = :Jxpr
-            push!(newa,ex.args[2]) # will be interpreted as Julia code, so don't translate it.
-        else
-            @inbounds for i in 2:length(a) push!(newa,extomx(a[i])) end
-        end
+    if is_call(ex) return parse_call(ex,newa)
     elseif ohead == :block && typeof(a[1]) == LineNumberNode  # g(x_Integer) = "int". julia finds line number node in rhs.
         return extomx(a[2])
     elseif ohead == :line return nothing # Ignore line number. part of misinterpretation of g(x_Integer) = "int".
@@ -327,23 +274,10 @@ function extomx(ex::Expr)
     elseif ohead == :string
         nhead = :StringInterpolation
         extomxarr!(a,newa)
-    # elseif ohead == :parameters  # we interpret as a compound expression
-    # return parse_parameters(ex)
-    # head = parse_parameters(ex,newa)        
     else
         dump(ex)
         error("extomx: No translation for Expr head '$(ohead)' in $ex")
     end
-    if length(newa) > 1 && isa(newa[1],Mxpr{:TestExpression})
-        newa = parseTestExpression(newa)
-    end
-    #     nna = newargs()
-    #     for i in 2:length(newa)
-    #         unshift!(nna,newa[i])
-    #     end
-    #     push!(nna,newa[1])
-    #     newa = nna
-    # end
     mx = mxpr(nhead,newa)  # Create the Mxpr
 end
 
