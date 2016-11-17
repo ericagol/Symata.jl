@@ -466,6 +466,7 @@ function _constantarray(expr::Mxpr,n::Integer)
 end
 
 @doap function ConstantArray(expr,ns::Mxpr{:List})
+    all(x->isa(x,Integer), margs(ns)) || return mx
     _constantarray(expr,reverse(margs(ns)))
 end
 

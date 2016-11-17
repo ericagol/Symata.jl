@@ -58,9 +58,14 @@ allows embedding Julia expressions. A Jxpr is entered like this `:( expr )`.
 
 # quote, i.e. :( expr ) is parsed as a Julia expression and is wrapped as
 # Mxpr with head Jxpr. It is evaluated here.
-apprules(mx::Mxpr{:Jxpr}) = do_jxpr(mx,mx[1])
-do_jxpr{T<:Union{Expr,Symbol}}(mx::Mxpr{:Jxpr}, ex::T) = eval(ex)
-do_jxpr(mx::Mxpr{:Jxpr}, x) = symerror("Jxpr: Can't execute Julia code of type ", typeof(x))
+@mkapprule Jxpr
+
+@doap Jxpr{T<:Union{Expr,Symbol}}(ex::T) = eval(ex)
+@doap Jxpr(x) = symerror("Jxpr: Can't execute Julia code of type ", typeof(x))
+
+#apprules(mx::Mxpr{:Jxpr}) = do_jxpr(mx,mx[1])
+#do_jxpr{T<:Union{Expr,Symbol}}(mx::Mxpr{:Jxpr}, ex::T) = eval(ex)
+#do_jxpr(mx::Mxpr{:Jxpr}, x) = symerror("Jxpr: Can't execute Julia code of type ", typeof(x))
 
 #### Unpack
 
