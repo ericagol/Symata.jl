@@ -713,7 +713,7 @@ threads `f` over any expressions with head `h`
 
 threads only over elments specified by the standard seuence specification `spec.
 """
-@mkapprule Thread
+@mkapprule Thread :nargs => 1:3
 
 @doap Thread(x::Mxpr) = threadlistable(x)
 @doap Thread(x::Mxpr,head) = threadlistable(x,head)
@@ -762,7 +762,7 @@ end
 threadlistable(x,head,s::SequenceAll) = threadlistable(x,head)
 threadlistable(x,head,s::SequenceNone) = x  # copy ?
 
-function threadlistable(mx::Mxpr, head, seqspec::SequenceSpec)
+function threadlistable(mx, head, seqspec::SequenceSpec)
     pos = Array(Int,0)      # should avoid this
     lenmx = length(mx)
     lenlist::Int = -1  # length of lists that we will thread over
@@ -797,3 +797,11 @@ function threadlistable(mx::Mxpr, head, seqspec::SequenceSpec)
     nmx = mxpr(head,largs)
     return nmx
 end
+
+@sjdoc MapThread """
+    MapThread(f,list)
+
+threads `f` over lists in `list` and evaluates the result.
+"""
+@mkapprule MapThread :nargs => 2
+@doap MapThread(f,x) = threadlistable(mxpr(f,margs(x)))

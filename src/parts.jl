@@ -312,6 +312,3 @@ end
 end
 
 @curry_last Extract
-
-# Currying
-#do_GenHead(mx,head::Mxpr{:Extract}) =  mxpr(mhead(head),copy(margs(mx))...,margs(head)...)

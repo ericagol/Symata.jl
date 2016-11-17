@@ -581,21 +581,35 @@ end
 
 @sjseealso_group(Pop!, Push!)
 
+## This is not how this works
 ### Composition
+# @sjdoc Composition """
+#     Composition([f,g,...],arg)
+# returns f(g(...(arg)))
+# """
+# @mkapprule Composition
+# function do_GenHead(mx,head::Mxpr{:Composition})
+#     args = copy(margs(mx))
+#     mxpr(mhead(head),args[1],margs(head)...,args[2:end]...)
+# end
 
-@sjdoc Composition """
-    Composition([f,g,...],arg)
+## ComposeList
 
-returns f(g(...(arg)))
+@sjdoc ComposeList """
+    ComposeList([f1,f2,...],x)
+
+returns `[f1(x),f2(f1(x)),...]`.
 """
+@mkapprule ComposeList :nargs => 2
 
-@mkapprule Composition
-
-@doap function Composition(fs::Mxpr{:List},arg)
-    ops = reverse(margs(fs))
-    mout = mxpr(ops[1],arg)
+@doap function ComposeList(list::Mxpr{:List},x)
+    ops = reverse(margs(list))
+    mout = mxpr(ops[1],x)
+    nargs = newargs(1)
+    nargs[1] = mout
     for i in 2:length(ops)
         mout = mxpr(ops[i],mout)
+        push!(nargs,mout)
     end
-    mout
+    mxpr(:List,nargs)
 end
