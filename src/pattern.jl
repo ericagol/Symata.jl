@@ -258,7 +258,7 @@ ematch(pat::BlankT, m::Match) = matchBlank(pat,m.ex)
 ### BlankSequenceT
 
 function ematch(pat::BlankSequenceT, m::Match)
-    m.parent == NullMxpr && error("BlankSequence with no parent expression")
+    m.parent == NullMxpr && error("Unimplemented: BlankSequence with no parent expression")
     imx = m.imx
     args = newargs()  # TODO: move allocation
     len = symlength(m.parent)
@@ -278,7 +278,7 @@ function ematch(pat::BlankSequenceT, m::Match)
 end
 
 function ematch(pat::BlankNullSequenceT, m::Match)
-    m.parent == NullMxpr && error("BlankNullSequence with no parent expression")
+    m.parent == NullMxpr && error("Unimplemented: BlankNullSequence with no parent expression")
     imx = m.imx
     args = newargs()
     len = symlength(m.parent)
@@ -414,7 +414,7 @@ end
 #### General Mxpr
 
 # It is starting to look like we should iterate over the patterns and not the expression parts.
-# ie, iterarate over pat. As it is, not much of BlankNullSequence works
+# ie, iterate over pat. As it is, not much of BlankNullSequence works
 # eg, BlankNullSequence can match even if there is no expression to iterate over.
 function match_and_capt_no_optional_no_repeated(pat,m)
     mx = m.ex
@@ -425,7 +425,7 @@ function match_and_capt_no_optional_no_repeated(pat,m)
     saveparent = m.parent
     m.parent = m.ex
 
-    if symlength(mx) < symlength(pat)  # This is not a robust solution.
+    if symlength(mx) < symlength(pat)
         for i in 1:length(pat)
             if isa(pat[i],BlankNullSequenceT)
                 m.special = mxpr(:Sequence)

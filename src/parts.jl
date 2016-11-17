@@ -233,8 +233,6 @@ take(x,spec::SequenceMNS)   = mxpr(mhead(x), margs(x)[posnegi(x,spec.m):spec.s:p
 take(x,spec::SequenceNone)  = mxpr(mhead(x))
 take(x,spec::SequenceAll)   = mxpr(mhead(x), margs(x)...)
 
-posnegi(x::Mxpr,n::Integer) = n > 0 ? n : length(x) + n + 1
-
 ### Drop
 
 # With a little work, we could raise an error if the user tries to drop more elements

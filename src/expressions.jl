@@ -580,3 +580,22 @@ end
 @doap Pop!(x) = x
 
 @sjseealso_group(Pop!, Push!)
+
+### Composition
+
+@sjdoc Composition """
+    Composition([f,g,...],arg)
+
+returns f(g(...(arg)))
+"""
+
+@mkapprule Composition
+
+@doap function Composition(fs::Mxpr{:List},arg)
+    ops = reverse(margs(fs))
+    mout = mxpr(ops[1],arg)
+    for i in 2:length(ops)
+        mout = mxpr(ops[i],mout)
+    end
+    mout
+end
