@@ -264,6 +264,7 @@ function extomx(ex::Expr)
     local nhead::Any
     ex = rewrite_expr(ex)
     isa(ex,Expr) || return ex  # may be a rational
+    ohead = ex.head
     a = ex.args
     # We usually set the head and args in the conditional and construct Mxpr at the end
     if is_call(ex) # ex.head == :call
@@ -274,19 +275,19 @@ function extomx(ex::Expr)
         else
             @inbounds for i in 2:length(a) push!(newa,extomx(a[i])) end
         end
-    elseif ex.head == :block && typeof(a[1]) == LineNumberNode  # g(x_Integer) = "int". julia finds line number node in rhs.
+    elseif ohead == :block && typeof(a[1]) == LineNumberNode  # g(x_Integer) = "int". julia finds line number node in rhs.
         return extomx(a[2])
-    elseif ex.head == :line return nothing # Ignore line number. part of misinterpretation of g(x_Integer) = "int".
-    elseif haskey(JTOMSYM,ex.head)
-        nhead = JTOMSYM[ex.head]
+    elseif ohead == :line return nothing # Ignore line number. part of misinterpretation of g(x_Integer) = "int".
+    elseif haskey(JTOMSYM,ohead)
+        nhead = JTOMSYM[ohead]
         check_autoload(nhead)
         extomxarr!(a,newa)
-    elseif ex.head == :kw  # Interpret keword as Set, but Expr is different than when ex.head == :(=)
+    elseif ohead == :kw  # Interpret keword as Set, but Expr is different than when ohead == :(=)
         nhead = :Set
         extomxarr!(a,newa)
-    elseif ex.head == :(::)
+    elseif ohead == :(::)
         return parsepattern(ex)
-    elseif ex.head == :(:) # Eg the colon here: g(x_Integer:?(EvenQ)) := x
+    elseif ohead == :(:) # Eg the colon here: g(x_Integer:?(EvenQ)) := x
         if length(a) == 2
             if isa(a[1], Symbol) && isa(a[2], Expr) &&   # FIXME use isa() here
                 (a[2].args)[1] == :(?)
@@ -317,21 +318,21 @@ function extomx(ex::Expr)
             nhead = :Span
             extomxarr!(a,newa)
         end
-    elseif ex.head == :(.)  # don't need parens, but this is readable
+    elseif ohead == :(.)  # don't need parens, but this is readable
         return parse_qualified_symbol(ex)
-    elseif ex.head == :quote
+    elseif ohead == :quote
         nhead = parse_quoted(ex,newa)
-    elseif ex.head == :macrocall
+    elseif ohead == :macrocall
         return eval(ex )  # is this exactly what we want ?
-    elseif ex.head == :string
+    elseif ohead == :string
         nhead = :StringInterpolation
         extomxarr!(a,newa)
-    # elseif ex.head == :parameters  # we interpret as a compound expression
-    #     return parse_parameters(ex)
-#        head = parse_parameters(ex,newa)        
+    # elseif ohead == :parameters  # we interpret as a compound expression
+    # return parse_parameters(ex)
+    # head = parse_parameters(ex,newa)        
     else
         dump(ex)
-        error("extomx: No translation for Expr head '$(ex.head)' in $ex")
+        error("extomx: No translation for Expr head '$(ohead)' in $ex")
     end
     if length(newa) > 1 && isa(newa[1],Mxpr{:TestExpression})
         newa = parseTestExpression(newa)
