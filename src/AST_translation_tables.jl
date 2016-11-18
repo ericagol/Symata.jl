@@ -198,12 +198,21 @@ end
 # Nonsymbolic Heads, Integer, etc. assume they are prefix ops
 getoptype(x) = :prefix
 
+# function getoptype(x::Mxpr)
+#     println("getting opt type for ", mhead(x), " args ", margs(x))
+#     res = getoptype(mhead(x))
+#     println("Resutt is $res")
+#     res
+# end
+
 function getoptype(x::Symbol)
     if haskey(OPTYPE,x)
         return OPTYPE[x]
     end
     return :prefix
 end
+
+
 
 #### Comparison symbols
 
