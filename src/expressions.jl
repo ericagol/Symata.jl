@@ -381,14 +381,6 @@ For example, `getints = Cases(_Integer)`.
 
 @mkapprule Cases
 
-function sjcopy{T<:Union{AbstractString,Symbol}}(s::T)
-    identity(s)
-end
-
-function sjcopy(x)
-    copy(x)
-end
-
 # Allocating outside loop and sending Dict as arg is 3x faster in one test
 # @doap function Casesold(expr,pat)
 #     args = margs(expr)
