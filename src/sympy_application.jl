@@ -125,7 +125,11 @@ end
 function do_Integrate_kws(mx::Mxpr{:Integrate}, kws, expr)
     pymx = sjtopy(expr)
     pyintegral = sympy[:integrate](pymx; kws)
-    return pytosj(pyintegral)
+    sjres = pytosj(pyintegral)
+    if mhead(sjres) == :Integrate
+        deepsetfixed(sjres)  # we need this to avoid infinite eval
+    end    
+    sjres
 end
 
 # We annotate Dict here to fix BoundsError bug in Integrate(x)
@@ -142,21 +146,27 @@ end
 
 # FIXME: we do deepsetfixed and a symbol Int is returned. If we pull it out,
 # it is evaluated to Infinity[1] somehow. Maybe this is positive float Inf
+# FIXME: seprate somehow does not return conditions. piecewise does. we
+# should give piecewise and rewrite the result.
 function apprules(mx::Mxpr{:Integrate})
     kws = Dict()
     nargs = separate_rules(mx,kws)
-    # Two reasons for following. 1. We prefer 'separate' as default. 2. works around inf eval loop
+    # We should try with piecewise
+    # NO: Two reasons for following. 1. We prefer 'separate' as default. 2. works around inf eval loop
     # in case no conds are given
     if ! haskey(kws, :conds)
-        kws[:conds] = "separate"
+#        kws[:conds] = "separate"
     end
     if length(kws) == 0
         res = do_Integrate(mx,margs(mx)...)
     else
         res = do_Integrate_kws(mx,kws,nargs...)
     end
-    if is_Mxpr(res,:List)
+    if isa(res,ListT)
         return mxpr(:ConditionalExpression, margs(res)...)
+    end
+    if isa(res,Mxpr{:Integrate})
+       deepsetfixed(res)
     end
     res
 end
@@ -235,9 +245,11 @@ function apprules(mx::Mxpr{:InverseFourierTransform})
             pop!(margs(sjresult)) # we may also want to strip the Dummy()
         end
     end
-    if is_Mxpr(sjresult,:List)
+    if isa(sjresult,ListT)
         return mxpr(:ConditionalExpression, margs(sjresult)...)
     end
+    # elseif isa(Mxpr{:Piecewise},sjresult)
+    # end
     sjresult
 end
 
@@ -262,7 +274,8 @@ function do_Sum(mx::Mxpr{:Sum}, expr, varspecs...)
         specs = margs(res)[2:end]
         return mxpr(:Sum,summand,reverse(specs)...)
     end
-    return is_Mxpr(res,:Piecewise) ? res[1] : res
+    return res
+#    return is_Mxpr(res,:Piecewise) ? res[1] : res
 end
 
 #### Product
