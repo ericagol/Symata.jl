@@ -37,7 +37,7 @@ an option specifiying that solutions including Gaussian integers should be retur
 # Convert Mxpr to sympy, pulling out Rule(a,b) to dict of keyword args.
 # That is, we separate keyword args from positional argss
 function sjtopy_kw{T<:Mxpr}(mx::T, kws)
-    println("Looking for kw $kws")
+#    println("Looking for kw $kws")
     args = margs(mx)
     nargs = newargs()
     for i in 1:length(args)
