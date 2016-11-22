@@ -126,9 +126,9 @@ const pymx_special_symbol_dict = Dict()
 
 # NOTE: The test suite passes with this dict empty
 # So, we leave it empty until we see something we don't like.
-# Nov 2016. Finally found something to put here...
+# Nov 2016. Finally found something to put here... No, we needed to move it to the 'rewrite' dictionary
 const py_to_mx_symbol_dict = Dict(
-                                  :ExprCondPair => :ConditionalExpression
+#                                  :ExprCondPair => :ConditionalExpression
                                   )
 
 # const py_to_mx_symbol_dict = Dict(
@@ -371,8 +371,9 @@ pytosj_BooleanTrue(pyexpr) = true
 # Needed for: Integrate(Exp(-x^2),  [x,0,Infinity]) == (1/2)*(Pi^(1/2))
 py_to_mx_rewrite_function_dict["BooleanTrue"] = pytosj_BooleanTrue
 # need deepsetfixed, not just setfixed
-py_to_mx_rewrite_function_dict["Integral"] = pyexpr -> setfixed(mxpr(:Integrate, map(pytosj, pyexpr[:args])...))
-py_to_mx_rewrite_function_dict["Sum"] = pyexpr -> setfixed(mxpr(:Sum, map(pytosj, pyexpr[:args])...))
+py_to_mx_rewrite_function_dict["Integral"] = pyexpr -> deepsetfixed(mxpr(:Integrate, map(pytosj, pyexpr[:args])...))
+py_to_mx_rewrite_function_dict["Sum"] = pyexpr -> deepsetfixed(mxpr(:Sum, map(pytosj, pyexpr[:args])...))
+py_to_mx_rewrite_function_dict["ExprCondPair"] = pyexpr -> deepsetfixed(mxpr(:ConditionalExpression, map(pytosj, pyexpr[:args])...))
 
 ####
 ####   Main _pytosj method

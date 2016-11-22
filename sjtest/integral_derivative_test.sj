@@ -16,8 +16,7 @@ expr = i^2
 T Sum(expr, [i,1,n]) == (1/6)*n + (1/2)*(n^2) + (1/3)*(n^3)  # This is the behavior we want.
 T Sum(Evaluate(expr), [i,1,n]) == (1/6)*n + (1/2)*(n^2) + (1/3)*(n^3)
 
-# FIXME: infinite loop. Bug is in Symata, not sympy
-# Map(Function(n, Sum(1/i^n,[i,1,Infinity])), [2])
+Map(Function(n, Sum(1/i^n,[i,1,Infinity])), [2])
 
 g(n_) := Sum(1/i^n,[i,1,Infinity])
 T Map(g, [2,3,4,5,6]) == [(1/6)*(Pi^2),Zeta(3),(1/90)*(Pi^4),Zeta(5),(1/945)*(Pi^6)]
@@ -28,7 +27,7 @@ T Sum((j + i)^(1), [i,1,3], [j,1,i]) == 24
 
 r = Sum(x^n, [n,0,Infinity])
 T Sum(x^n, [n,0,Infinity])[1] == ConditionalExpression((1 - x)^(-1),Abs(x) < 1)
-# FIXME. This is returned unevaluated. This is because of deepsetfixe and that Sum is returned as a subexpression
+# FIXME. This is returned unevaluated. This is because of deepsetfixed and that Sum is returned as a subexpression
 #T r == Piecewise(ConditionalExpression((1 - x)^(-1),Abs(x) < 1),Sum(x^n,[n,0,Infinity]))
 x = 7
 T r[1] == Undefined
@@ -78,18 +77,13 @@ a = 1/2
 T res[1] == (1/2)*(Pi^(1/2))
 a = -3/2
 # broken ?
-#T res[1] == Undefined
+## FIXME. causes infinite eval loop the first time this file is read. on subsequent reads, it does not.
+T res[1] == Undefined
 ClearAll(a)
-## FIXME. causes infinite eval loop the first time this file is read. on subsequent reads, it does not
 T res[1] == ConditionalExpression(Gamma(1 + a),-Re(a) < 1)
 
 T Integrate(Exp(-x^2),  [x,0,Infinity]) == (1/2)*(Pi^(1/2))
 
-# Following works if 1/cos does not go to sec
-# T r == -1 * Log(-1 + Tan((1//2) * a + (1//2) * x)) + Log(1 + Tan((1//2) * a + (1//2) * x))
-
-# Following works if 1/cos does not go to sec
-#T Simplify(D(r,x)) == 1/Cos(x+a)
  ClearAll(r,y,x,res,a)
 
 ####  MellinTransform
