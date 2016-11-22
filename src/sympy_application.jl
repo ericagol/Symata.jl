@@ -108,7 +108,11 @@ gives the definite integral.
 function do_Integrate(mx::Mxpr{:Integrate},expr)
     pymx = sjtopy(expr)
     pyintegral = sympy[:integrate](pymx)
-    return pytosj(pyintegral)
+    sjres = pytosj(pyintegral)
+    if mhead(sjres) == :Integrate  # probably wrong wrt false positives and negatives
+        deepsetfixed(sjres)
+    end
+    sjres
 end
 
 function do_Integrate(mx::Mxpr{:Integrate}, expr, varspecs...)
@@ -163,12 +167,12 @@ function apprules(mx::Mxpr{:Integrate})
         res = do_Integrate_kws(mx,kws,nargs...)
     end
     if isa(res,ListT)
-        return mxpr(:ConditionalExpression, margs(res)...)
+        return deepsetfixed(mxpr(:ConditionalExpression, margs(res)...))
     end
-    if isa(res,Mxpr{:Integrate})
+    if isa(res,Mxpr{:Integrate}) || isa(res,Mxpr{:Piecewise})
        deepsetfixed(res)
     end
-    res
+    deepsetfixed(res)
 end
 
 register_sjfunc_pyfunc("Integrate", "integrate")
@@ -274,8 +278,9 @@ function do_Sum(mx::Mxpr{:Sum}, expr, varspecs...)
         specs = margs(res)[2:end]
         return mxpr(:Sum,summand,reverse(specs)...)
     end
-    return res
-#    return is_Mxpr(res,:Piecewise) ? res[1] : res
+#    return res
+    #    return is_Mxpr(res,:Piecewise) ? res[1] : res
+    return is_Mxpr(res,:Piecewise) ? deepsetfixed(res) : res
 end
 
 #### Product
