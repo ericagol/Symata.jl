@@ -110,7 +110,7 @@ function do_Integrate(mx::Mxpr{:Integrate},expr)
     pyintegral = sympy[:integrate](pymx)
     sjres = pytosj(pyintegral)
     if mhead(sjres) == :Integrate  # probably wrong wrt false positives and negatives
-        deepsetfixed(sjres)
+#        deepsetfixed(sjres)
     end
     sjres
 end
@@ -121,7 +121,7 @@ function do_Integrate(mx::Mxpr{:Integrate}, expr, varspecs...)
     pyintegral = sympy[:integrate](pymx,pyvarspecs...)
     sjres = pytosj(pyintegral)
     if mhead(sjres) == :Integrate  # probably wrong wrt false positives and negatives
-        deepsetfixed(sjres)  # we need this to avoid infinite eval
+#        deepsetfixed(sjres)  # we need this to avoid infinite eval
     end
     sjres
 end
@@ -131,7 +131,7 @@ function do_Integrate_kws(mx::Mxpr{:Integrate}, kws, expr)
     pyintegral = sympy[:integrate](pymx; kws)
     sjres = pytosj(pyintegral)
     if mhead(sjres) == :Integrate
-        deepsetfixed(sjres)  # we need this to avoid infinite eval
+#       deepsetfixed(sjres)  # we need this to avoid infinite eval
     end    
     sjres
 end
@@ -143,7 +143,8 @@ function do_Integrate_kws{T<:Dict}(mx::Mxpr{:Integrate}, kws::T, expr, varspecs.
     pyintegral = sympy[:integrate](pymx,pyvarspecs...; kws...)
     sjres = pytosj(pyintegral)
     if mhead(sjres) == :Integrate  # probably wrong wrt false positives and negatives
-        deepsetfixed(sjres)  # we need this to avoid infinite eval
+#        deepsetfixed(sjres)  # we need this to avoid infinite eval
+        sjres  # we need this to avoid infinite eval
     end
     sjres
 end
@@ -167,12 +168,14 @@ function apprules(mx::Mxpr{:Integrate})
         res = do_Integrate_kws(mx,kws,nargs...)
     end
     if isa(res,ListT)
-        return deepsetfixed(mxpr(:ConditionalExpression, margs(res)...))
+#        return deepsetfixed(mxpr(:ConditionalExpression, margs(res)...))
+        return mxpr(:ConditionalExpression, margs(res)...)
     end
-    if isa(res,Mxpr{:Integrate}) || isa(res,Mxpr{:Piecewise})
-       deepsetfixed(res)
-    end
-    deepsetfixed(res)
+    res
+    # if isa(res,Mxpr{:Integrate}) || isa(res,Mxpr{:Piecewise})
+    #    deepsetfixed(res)
+    # end
+    # deepsetfixed(res)
 end
 
 register_sjfunc_pyfunc("Integrate", "integrate")
@@ -278,9 +281,10 @@ function do_Sum(mx::Mxpr{:Sum}, expr, varspecs...)
         specs = margs(res)[2:end]
         return mxpr(:Sum,summand,reverse(specs)...)
     end
+    res
 #    return res
     #    return is_Mxpr(res,:Piecewise) ? res[1] : res
-    return is_Mxpr(res,:Piecewise) ? deepsetfixed(res) : res
+#    return is_Mxpr(res,:Piecewise) ? deepsetfixed(res) : res  ## FIXME: in sympy.jl do deepsetfixed on just Sum
 end
 
 #### Product

@@ -5,13 +5,6 @@ const mpmath = PyCall.PyNULL()
 
 import Base: isless
 
-# We no longer have a module here.
-# export pytosj, sjtopy
-# export sympy
-
-#importall Symata
-#import Symata: mxpr, mxprcf  # we need this even with importall
-
 # Notes for evenutally extracting mpz and mpf from python mpmath objects
 #  julia> ex[:_mpf_][2]
 #  PyObject mpz(5400274185508743)
@@ -259,7 +252,7 @@ function populate_py_to_mx_dict()
                     (sympy[:Mul], :Times),
                     (sympy[:Pow] ,:Power),
                     (sympy[:Derivative], :D),
-                    (sympy[:integrals]["Integral"], :Integrate),
+#                      (sympy[:integrals]["Integral"], :Integrate),  remove this, else it prevents our special rewrite function
                     (sympy[:containers][:Tuple], :List),  # Problem, a List may be huge, Tuple not... but this is a sympy Tuple
                     (sympy[:oo], :Infinity),
                     (sympy[:zoo],:ComplexInfinity))
@@ -375,9 +368,11 @@ end
 @pytosj_comparisons("unequality", "Unequality", "!=")
 
 pytosj_BooleanTrue(pyexpr) = true
-
 # Needed for: Integrate(Exp(-x^2),  [x,0,Infinity]) == (1/2)*(Pi^(1/2))
 py_to_mx_rewrite_function_dict["BooleanTrue"] = pytosj_BooleanTrue
+# need deepsetfixed, not just setfixed
+py_to_mx_rewrite_function_dict["Integral"] = pyexpr -> setfixed(mxpr(:Integrate, map(pytosj, pyexpr[:args])...))
+py_to_mx_rewrite_function_dict["Sum"] = pyexpr -> setfixed(mxpr(:Sum, map(pytosj, pyexpr[:args])...))
 
 ####
 ####   Main _pytosj method
