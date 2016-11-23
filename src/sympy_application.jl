@@ -108,11 +108,7 @@ gives the definite integral.
 function do_Integrate(mx::Mxpr{:Integrate},expr)
     pymx = sjtopy(expr)
     pyintegral = sympy[:integrate](pymx)
-    sjres = pytosj(pyintegral)
-    if mhead(sjres) == :Integrate  # probably wrong wrt false positives and negatives
-#        deepsetfixed(sjres)
-    end
-    sjres
+    return pytosj(pyintegral)
 end
 
 function do_Integrate(mx::Mxpr{:Integrate}, expr, varspecs...)
@@ -121,7 +117,7 @@ function do_Integrate(mx::Mxpr{:Integrate}, expr, varspecs...)
     pyintegral = sympy[:integrate](pymx,pyvarspecs...)
     sjres = pytosj(pyintegral)
     if mhead(sjres) == :Integrate  # probably wrong wrt false positives and negatives
-#        deepsetfixed(sjres)  # we need this to avoid infinite eval
+        deepsetfixed(sjres)  # we need this to avoid infinite eval
     end
     sjres
 end
@@ -129,11 +125,7 @@ end
 function do_Integrate_kws(mx::Mxpr{:Integrate}, kws, expr)
     pymx = sjtopy(expr)
     pyintegral = sympy[:integrate](pymx; kws)
-    sjres = pytosj(pyintegral)
-    if mhead(sjres) == :Integrate
-#       deepsetfixed(sjres)  # we need this to avoid infinite eval
-    end    
-    sjres
+    return pytosj(pyintegral)
 end
 
 # We annotate Dict here to fix BoundsError bug in Integrate(x)
@@ -143,42 +135,39 @@ function do_Integrate_kws{T<:Dict}(mx::Mxpr{:Integrate}, kws::T, expr, varspecs.
     pyintegral = sympy[:integrate](pymx,pyvarspecs...; kws...)
     sjres = pytosj(pyintegral)
     if mhead(sjres) == :Integrate  # probably wrong wrt false positives and negatives
-#        deepsetfixed(sjres)  # we need this to avoid infinite eval
-        sjres  # we need this to avoid infinite eval
+        deepsetfixed(sjres)  # we need this to avoid infinite eval
     end
     sjres
 end
 
 # FIXME: we do deepsetfixed and a symbol Int is returned. If we pull it out,
 # it is evaluated to Infinity[1] somehow. Maybe this is positive float Inf
-# FIXME: seprate somehow does not return conditions. piecewise does. we
-# should give piecewise and rewrite the result.
 function apprules(mx::Mxpr{:Integrate})
     kws = Dict()
     nargs = separate_rules(mx,kws)
-    # We should try with piecewise
-    # NO: Two reasons for following. 1. We prefer 'separate' as default. 2. works around inf eval loop
+    # Two reasons for following. 1. We prefer 'separate' as default. 2. works around inf eval loop
     # in case no conds are given
-    if ! haskey(kws, :conds)
-#        kws[:conds] = "separate"
-    end
-    if length(kws) == 0
-        res = do_Integrate(mx,margs(mx)...)
-    else
-        res = do_Integrate_kws(mx,kws,nargs...)
-    end
-    if isa(res,ListT)
-#        return deepsetfixed(mxpr(:ConditionalExpression, margs(res)...))
-        return mxpr(:ConditionalExpression, margs(res)...)
-    end
-    res
-    # if isa(res,Mxpr{:Integrate}) || isa(res,Mxpr{:Piecewise})
-    #    deepsetfixed(res)
+    # if ! haskey(kws, :conds)
+    #     kws[:conds] = "separate"
     # end
-    # deepsetfixed(res)
+    res = isempty(kws) ? do_Integrate(mx,margs(mx)...) : do_Integrate_kws(mx,kws,nargs...)
+    res = isa(res,ListT) ? mxpr(:ConditionalExpression, margs(res)...) : res  ## TODO refactor this line. it is in other integral functions.
+    fix_integrate_piecewise(typeof(mx),res)
 end
 
 register_sjfunc_pyfunc("Integrate", "integrate")
+
+## Sympy returns the unevaluated form as the last member of Piecewise. Mma does not do this.
+## In Symata it causes an infinite evaluation loop. So we remove these final forms for Integrate and Sum
+fix_integrate_piecewise(y,x) = x
+function fix_integrate_piecewise(mxprtype, mx::Mxpr{:Piecewise})
+    isempty(mx) && return mx
+    length(mx) < 2 && return mx
+    last = mx[end]
+    isempty(last) && return mx
+    isa(mx[1],mxprtype) && pop!(mx)
+    return length(mx) == 1 ? mx[1] : mx
+end
 
 #### LaplaceTransform
 
@@ -200,7 +189,7 @@ function apprules(mx::Mxpr{:LaplaceTransform})
     if is_Mxpr(res,:List)
         return mxpr(:ConditionalExpression, margs(res)...)
     end
-    res
+    fix_integrate_piecewise(typeof(mx),res)  #
 end
 
 #### InverseLaplaceTransform
@@ -252,11 +241,9 @@ function apprules(mx::Mxpr{:InverseFourierTransform})
             pop!(margs(sjresult)) # we may also want to strip the Dummy()
         end
     end
-    if isa(sjresult,ListT)
+    if is_Mxpr(sjresult,:List)
         return mxpr(:ConditionalExpression, margs(sjresult)...)
     end
-    # elseif isa(Mxpr{:Piecewise},sjresult)
-    # end
     sjresult
 end
 
@@ -281,10 +268,8 @@ function do_Sum(mx::Mxpr{:Sum}, expr, varspecs...)
         specs = margs(res)[2:end]
         return mxpr(:Sum,summand,reverse(specs)...)
     end
-    res
-#    return res
-    #    return is_Mxpr(res,:Piecewise) ? res[1] : res
-#    return is_Mxpr(res,:Piecewise) ? deepsetfixed(res) : res  ## FIXME: in sympy.jl do deepsetfixed on just Sum
+    fix_integrate_piecewise(typeof(mx),res)
+#    return is_Mxpr(res,:Piecewise) ? res[1] : res
 end
 
 #### Product
