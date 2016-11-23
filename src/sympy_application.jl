@@ -116,9 +116,10 @@ function do_Integrate(mx::Mxpr{:Integrate}, expr, varspecs...)
     pyvarspecs = varspecs_to_tuples_of_sympy(collect(varspecs))
     pyintegral = sympy[:integrate](pymx,pyvarspecs...)
     sjres = pytosj(pyintegral)
-    if mhead(sjres) == :Integrate  # probably wrong wrt false positives and negatives
-        deepsetfixed(sjres)  # we need this to avoid infinite eval
-    end
+    # This is done in sympy.jl now
+    # if mhead(sjres) == :Integrate  # probably wrong wrt false positives and negatives
+    #     deepsetfixed(sjres)  # we need this to avoid infinite eval
+    # end
     sjres
 end
 
@@ -134,9 +135,9 @@ function do_Integrate_kws{T<:Dict}(mx::Mxpr{:Integrate}, kws::T, expr, varspecs.
     pyvarspecs = varspecs_to_tuples_of_sympy(collect(varspecs))
     pyintegral = sympy[:integrate](pymx,pyvarspecs...; kws...)
     sjres = pytosj(pyintegral)
-    if mhead(sjres) == :Integrate  # probably wrong wrt false positives and negatives
-        deepsetfixed(sjres)  # we need this to avoid infinite eval
-    end
+    # if mhead(sjres) == :Integrate  # probably wrong wrt false positives and negatives
+    #     deepsetfixed(sjres)  # we need this to avoid infinite eval
+    # end
     sjres
 end
 
