@@ -370,15 +370,18 @@ end
 pytosj_BooleanTrue(pyexpr) = true
 # Needed for: Integrate(Exp(-x^2),  [x,0,Infinity]) == (1/2)*(Pi^(1/2))
 py_to_mx_rewrite_function_dict["BooleanTrue"] = pytosj_BooleanTrue
+
+## Maybe don't need this anymore ?
 # need deepsetfixed, not just setfixed
 py_to_mx_rewrite_function_dict["Integral"] = pyexpr -> deepsetfixed(mxpr(:Integrate, map(pytosj, pyexpr[:args])...))
 py_to_mx_rewrite_function_dict["Sum"] = pyexpr -> deepsetfixed(mxpr(:Sum, map(pytosj, pyexpr[:args])...))
 
+## TODO: clean this up after we are sure it what we want
 function rewriteExprCondPair(pyexpr)
-    setfixed(mxpr(:ConditionalExpression, deepsetfixed(pytosj(pyexpr[:args][1])), pytosj(pyexpr[:args][2])))
+    #  setfixed(mxpr(:ConditionalExpression, deepsetfixed(pytosj(pyexpr[:args][1])), pytosj(pyexpr[:args][2])))
+    mxpr(:ConditionalExpression, pytosj(pyexpr[:args][1]), pytosj(pyexpr[:args][2]))
 end
 py_to_mx_rewrite_function_dict["ExprCondPair"] = rewriteExprCondPair
-
 # pyexpr -> deepsetfixed(mxpr(:ConditionalExpression,  map(pytosj, pyexpr[:args])...))
 
 ####

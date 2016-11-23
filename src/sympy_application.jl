@@ -165,9 +165,13 @@ function fix_integrate_piecewise(mxprtype, mx::Mxpr{:Piecewise})
     length(mx) < 2 && return mx
     last = mx[end]
     isempty(last) && return mx
-    isa(mx[1],mxprtype) && pop!(mx)
+    if isa(last,Mxpr{:ConditionalExpression})
+        isa(last[1], mxprtype) && return mx[1]
+    end
+#    isa(mx[1],mxprtype) && pop!(mx)
     return length(mx) == 1 ? mx[1] : mx
 end
+
 
 #### LaplaceTransform
 
