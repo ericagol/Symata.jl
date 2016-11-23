@@ -373,8 +373,13 @@ py_to_mx_rewrite_function_dict["BooleanTrue"] = pytosj_BooleanTrue
 # need deepsetfixed, not just setfixed
 py_to_mx_rewrite_function_dict["Integral"] = pyexpr -> deepsetfixed(mxpr(:Integrate, map(pytosj, pyexpr[:args])...))
 py_to_mx_rewrite_function_dict["Sum"] = pyexpr -> deepsetfixed(mxpr(:Sum, map(pytosj, pyexpr[:args])...))
-py_to_mx_rewrite_function_dict["ExprCondPair"] =
-    pyexpr -> deepsetfixed(mxpr(:ConditionalExpression,  map(pytosj, pyexpr[:args])...))
+
+function rewriteExprCondPair(pyexpr)
+    setfixed(mxpr(:ConditionalExpression, deepsetfixed(pytosj(pyexpr[:args][1])), pytosj(pyexpr[:args][2])))
+end
+py_to_mx_rewrite_function_dict["ExprCondPair"] = rewriteExprCondPair
+
+# pyexpr -> deepsetfixed(mxpr(:ConditionalExpression,  map(pytosj, pyexpr[:args])...))
 
 ####
 ####   Main _pytosj method
