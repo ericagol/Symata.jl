@@ -29,6 +29,8 @@ symname(s::Qsym) = s.name
 # intended to be used from within Julia, or quoted julia. not used anywhere in code
 @inline sjval(s::SJSym) = getssym(s).val[1]
 
+getsymata(args...) = symval(args...)
+
 # Don't make these one-line defintions. They are easier to search for this way.
 
 """
@@ -61,6 +63,8 @@ end
 symval(x) = nothing  # maybe we should make this an error instead? We are using this method in exfunc.
 
 ## Sets an already existing Symata symbol
+
+setsymata(args...) = setsymval(args...)
 
 """
     setsymval(s::SSJSym,val)
@@ -597,9 +601,6 @@ function mxpr(s,iargs...)
     len = length(iargs)
     args = newargs(len)
     copy!(args,iargs)
-    # for i in 1:len
-    #     args[i] = iargs[i]
-    # end
     mxpra(s,args)
 end
 

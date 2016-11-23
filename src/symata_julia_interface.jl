@@ -83,14 +83,20 @@ key,value pairs is returned.
          ("Unpack( J(rand(3)) )", "[0.5548766917324894,0.034964001133465095,0.9122052258982192]"))
 
 function apprules(mx::Mxpr{:Unpack})
-    obj = mx[1]
-    mx = unpack_to_List(obj)
-    setfixed(mx)
-    setcanon(mx)
-    return mx
+    unpack_to_List(mx[1])
+    # obj = mx[1]
+    # mx = unpack_to_List(obj)
+    # setfixed(mx)
+    # setcanon(mx)
+    # return mx
 end
 
-unpack_to_List(obj) = mxpr(:List, do_unpack(obj))
+function unpack_to_List(obj)
+    mx = mxpr(:List, do_unpack(obj))
+    setfixed(mx)
+    setcanon(mx)
+    return mx    
+end
 do_unpack(obj) = copy!(newargs(length(obj)),obj)
 
 function do_unpack(dict::Dict)
