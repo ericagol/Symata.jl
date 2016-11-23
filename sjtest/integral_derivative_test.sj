@@ -27,12 +27,10 @@ T Sum((j + i)^(1), [i,1,3], [j,1,i]) == 24
 
 r = Sum(x^n, [n,0,Infinity])
 T Sum(x^n, [n,0,Infinity]) == ConditionalExpression((1 - x)^(-1),Abs(x) < 1)
-# FIXME. This is returned unevaluated. This is because of deepsetfixed and that Sum is returned as a subexpression
-#T r == Piecewise(ConditionalExpression((1 - x)^(-1),Abs(x) < 1),Sum(x^n,[n,0,Infinity]))
 x = 7
-T r == Undefined  # FIXME
+T r == Undefined
 x = 1/2
-T r == 2  # FIXME
+T r == 2
 ClearAll(r,x)
 
 ### Integrate
@@ -42,8 +40,7 @@ T Integrate(x,x) == 1//2 * x^2
 T Integrate(x,[x,0,1]) == 1//2
 T Integrate(x,[x,0,1],y) == 1//2 * y
 
-     r = Integrate(1/Cos(x + a), x)
-# T r == Log(Sec(a + x) + Tan(a + x))  # if not loading code_in_jl
+r = Integrate(1/Cos(x + a), x)
 
 T r == -1 * Log(-1 + Tan((1//2) * a + (1//2) * x)) + Log(1 + Tan((1//2) * a + (1//2) * x)) # are loading code_in_jl
 
@@ -70,17 +67,15 @@ T Integrate(Sqrt(1+x), x) == 2//3 * ((1 + x) ^ (3//2))
 ClearAll(res,a,x)
 
 res = Integrate(x^a * Exp(-x), [x,0,Infinity])
-## T res[1] == ConditionalExpression(Γ(1 + a),-Re(a) < 1) FIXME
+T res == ConditionalExpression(Γ(1 + a),-Re(a) < 1)
 
 T Integrate(x^a * Exp(-x), [x,0,Infinity], conds => "none") == Γ(1 + a)
 a = 1/2
-## T res[1] == (1/2)*(Pi^(1/2)) FIXME
+T res == (1/2)*(Pi^(1/2))
 a = -3/2
-# broken ?
-## FIXME. causes infinite eval loop the first time this file is read. on subsequent reads, it does not.
-## T res[1] == Undefined FIXME
+T res == Undefined
 ClearAll(a)
-## T res[1] == ConditionalExpression(Gamma(1 + a),-Re(a) < 1) FIXME
+T res == ConditionalExpression(Gamma(1 + a),-Re(a) < 1)
 
 T Integrate(Exp(-x^2),  [x,0,Infinity]) == (1/2)*(Pi^(1/2))
 
