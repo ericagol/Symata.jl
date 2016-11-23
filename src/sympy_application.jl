@@ -217,7 +217,7 @@ function apprules(mx::Mxpr{:InverseLaplaceTransform})
     if is_Mxpr(sjresult,:List)
         return mxpr(:ConditionalExpression, margs(sjresult)...)
     end
-    sjresult
+    fix_integrate_piecewise(typeof(mx),sjresult)
 end
 
 #### FourierTransform
