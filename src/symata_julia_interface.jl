@@ -87,6 +87,12 @@ key,value pairs is returned.
 
 @doap Unpack(a::AbstractArray) = unpacktoList(a)
 
+"""
+    unpacktoList(obj::AbstractArray{T,1})
+
+Converts a Julia array to a Symata list of type `ListT`. Only one-dimensional
+arrays are supported.
+"""
 function unpacktoList(obj)
     mx = mxpr(:List, do_unpack(obj))
     setfixed(mx)

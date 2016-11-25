@@ -8,7 +8,8 @@
 """
     symevalseq(expr::Any)
 
-send `expr` through the Symata evaluation sequence.
+send `expr` through the Symata evaluation sequence.  In most
+cases, this gives the same result as `symeval`.
 """
 symevalseq(args...) = doeval(args...)
 
@@ -139,7 +140,12 @@ end
 
 # Simply evaluate. Do not print "Out", or count things, etc.
 
-# user interface
+"""
+    symeval(expr::Any)
+
+send `expr` through the top level of the Symata evaluation sequence. In most
+cases, this gives the same result as `symevalseq`.
+"""
 function symeval(expr)
     exfunc(expr, SimpleExFuncOptions)
 end
