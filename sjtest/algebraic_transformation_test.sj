@@ -167,6 +167,6 @@ T Coefficient(Expand((x+y)^4), x*y^3) == 4
 
 ### CoefficientList
 
-T CoefficientList(x^3 + 2*x^2 + zz *x^5,x) == [0,0,2,1,0,zz]
+T CoefficientList(x^3 + 2*x^2 + zz *x^5, x) == [0,0,2,1,0,zz]
 
  ClearAll(x,y,z,f,deep,gaussian,modulus)

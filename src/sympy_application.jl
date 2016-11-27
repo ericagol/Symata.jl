@@ -676,8 +676,8 @@ end
     (spexpr,spvar) = (sjtopy(expr),sjtopy(var))
     p = sympy[:Poly](spexpr,spvar)
 #    cs = p[:coeffs]()  # lists only non-zero coefficients
-    cs = p[:all_coeffs]()
-    List(map(pytosj,reverse!(cs)))
+    cs = reverse!(p[:all_coeffs]())
+    List(map(pytosj,cs))
 end
 
 
