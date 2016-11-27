@@ -673,10 +673,29 @@ end
 @mkapprule CoefficientList
 
 @doap function CoefficientList(expr,var)
-    
+    (spexpr,spvar) = (sjtopy(expr),sjtopy(var))
+    p = sympy[:Poly](spexpr,spvar)
+#    cs = p[:coeffs]()  # lists only non-zero coefficients
+    cs = p[:all_coeffs]()
+    List(map(pytosj,reverse!(cs)))
 end
 
 
+### Coefficient
+
+@mkapprule Coefficient
+
+@doap function Coefficient(expr,subexpr)
+    (spexpr,spsubexpr) = (sjtopy(expr),sjtopy(subexpr))
+    cs = spexpr[:coeff](spsubexpr)
+    pytosj(cs)
+end
+
+@doap function Coefficient(expr,subexpr,pow)
+    (spexpr,spsubexpr) = (sjtopy(expr),sjtopy(mpow(subexpr,pow)))
+    cs = spexpr[:coeff](spsubexpr)
+    pytosj(cs)
+end
 
 ## utility
 
