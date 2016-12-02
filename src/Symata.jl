@@ -24,15 +24,23 @@ import some symbols from `Symata` into `Main` that are useful for development.
 function devimport()
     eval(Main, parse("""
        import Symata: @testex, symval, symname, setsymval, @aex, meval, doeval, infseval, getpart, setpart!,
-                      sympy, pytypeof, mxpr, canonexpr!, wrap_symata
+                      sympy, mpmath, pytypeof, mxpr, canonexpr!, wrap_symata
 """))
 end
 
 export devimport
 
+export  @testex, symval, symname, setsymval, @aex, meval, doeval, infseval, getpart, setpart!,
+sympy, mpmath, pytypeof, mxpr, canonexpr!, wrap_symata
+   
+export name, oname
+
+
+
 # These are for IJulia. We could probably import insymata in the interface code instead.
 export isymata, insymata
 
+include("version.jl")
 include("sjcompat.jl")
 #include("early_kernelstate.jl")
 include("mxpr.jl")
