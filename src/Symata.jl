@@ -33,7 +33,7 @@ export devimport
 export  @testex, symval, symname, setsymval, @aex, meval, doeval, infseval, getpart, setpart!,
 sympy, mpmath, pytypeof, mxpr, canonexpr!, wrap_symata
    
-export name, oname
+export name, typename
 
 
 
@@ -62,8 +62,8 @@ include("alteval.jl")
 include("doc.jl")
 include("misc_doc.jl")
 include("symbols.jl")
-#include("apprules.jl")
 include("random.jl")
+include("numcomb.jl")
 include("kernelstate.jl")
 include("evaluation.jl")
 include("comparison_logic.jl")
